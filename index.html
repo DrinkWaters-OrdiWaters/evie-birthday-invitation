@@ -46,10 +46,11 @@
     position: absolute;
     width: auto; max-width: 90%;
     padding: 16px 32px;
-    background: rgba(0,0,0,0.45);
+    background: rgba(0,0,0,0.6);
     border-radius: 16px;
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.1);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
   .scene-text.visible { opacity: 1; transform: translateY(0) scale(1); }
 
@@ -531,55 +532,64 @@ function drawParasol(p){
 
 // ============ CINEMA ELEMENTS ============
 function drawScreen(prog,t,showTitle){if(prog<=0)return;const p=easeInOut(clamp01(prog));
-const sx=W*0.2,sy=H*0.3,sw=W*0.22*p,sh=sw*0.56;ctx.save();
+// Screen size capped so it doesn't overflow
+const maxSW=Math.min(W*0.22, 320);
+const sx=W*0.2,sy=H*0.32,sw=maxSW*p,sh=sw*0.56;
+ctx.save();
+// Tripod
 ctx.fillStyle='#444';ctx.fillRect(sx-1.5,sy-8,3,sh+48);
 ctx.beginPath();ctx.moveTo(sx,sy+sh+35);ctx.lineTo(sx-25,sy+sh+46);ctx.lineWidth=2.5;ctx.strokeStyle='#444';ctx.stroke();
 ctx.beginPath();ctx.moveTo(sx,sy+sh+35);ctx.lineTo(sx+25,sy+sh+46);ctx.stroke();
-if(sw>8){ctx.save();ctx.shadowColor='rgba(255,255,255,0.5)';ctx.shadowBlur=35*p;
+if(sw>8){
+// White screen
+ctx.save();ctx.shadowColor='rgba(255,255,255,0.4)';ctx.shadowBlur=25*p;
 ctx.fillStyle='#FAFAFA';roundRect(sx-sw/2,sy,sw,sh,2);ctx.fill();ctx.restore();
 ctx.strokeStyle='#222';ctx.lineWidth=2.5;roundRect(sx-sw/2,sy,sw,sh,2);ctx.stroke();
-if(prog>0.4){const fp=clamp01((prog-0.4)/0.6);ctx.save();ctx.globalAlpha=fp;
+if(prog>0.4){const fp=clamp01((prog-0.4)/0.6);
+// Clip everything inside the screen
+ctx.save();
+roundRect(sx-sw/2+2,sy+2,sw-4,sh-4,1);ctx.clip();
+ctx.globalAlpha=fp;
 if(showTitle){
-// "Evie is turning 7!" on the screen with celebration colors
+// Purple background
 const gr2=ctx.createLinearGradient(sx-sw/2,sy,sx+sw/2,sy+sh);
 gr2.addColorStop(0,'#1a0a2e');gr2.addColorStop(0.5,'#2d1b4e');gr2.addColorStop(1,'#1a0a2e');
-ctx.fillStyle=gr2;roundRect(sx-sw/2+3,sy+3,sw-6,sh-6,1);ctx.fill();
-// Sparkle dots on screen
+ctx.fillStyle=gr2;ctx.fillRect(sx-sw/2,sy,sw,sh);
+// Sparkles
 ctx.globalAlpha=fp*0.6;
-for(let i=0;i<12;i++){const angle=t*0.8+i*0.52;const radius=Math.min(sw,sh)*0.35;
-const sparkX=sx+Math.cos(angle)*radius*(0.5+Math.sin(i)*0.5);
-const sparkY=sy+sh/2+Math.sin(angle)*radius*0.4;
-const sparkSize=1.5+Math.sin(t*3+i*1.1)*1;
+for(let i=0;i<10;i++){const angle=t*0.8+i*0.52;const radius=Math.min(sw,sh)*0.3;
+const sparkX=sx+Math.cos(angle)*radius*(0.4+Math.sin(i)*0.4);
+const sparkY=sy+sh/2+Math.sin(angle)*radius*0.35;
 ctx.fillStyle=i%3===0?'#FF69B4':i%3===1?'#FFD700':'#87CEEB';
-ctx.beginPath();ctx.arc(sparkX,sparkY,sparkSize,0,Math.PI*2);ctx.fill();}
-// Title text
+ctx.beginPath();ctx.arc(sparkX,sparkY,1.5+Math.sin(t*3+i)*0.8,0,Math.PI*2);ctx.fill();}
+// Title text — sizes capped
 ctx.globalAlpha=fp;
-const fontSize=Math.max(8,sw*0.1);
-ctx.font=`bold ${fontSize}px Fredoka One, Comic Sans MS, cursive`;
+const fs=Math.min(Math.max(8,sh*0.22),28);
 ctx.textAlign='center';ctx.textBaseline='middle';
-// Text shadow/glow
-ctx.shadowColor='rgba(255,105,180,0.8)';ctx.shadowBlur=15;
-ctx.fillStyle='#FF69B4';
-ctx.fillText('Evie',sx,sy+sh*0.32);
-ctx.font=`bold ${fontSize*0.65}px Fredoka One, Comic Sans MS, cursive`;
-ctx.fillStyle='#FFD700';ctx.shadowColor='rgba(255,215,0,0.8)';
-ctx.fillText('is turning',sx,sy+sh*0.52);
-ctx.font=`bold ${fontSize*1.4}px Fredoka One, Comic Sans MS, cursive`;
-ctx.fillStyle='#fff';ctx.shadowColor='rgba(255,255,255,0.8)';ctx.shadowBlur=20;
+ctx.shadowColor='rgba(255,105,180,0.7)';ctx.shadowBlur=8;
+ctx.font='bold '+fs+'px Fredoka One,Comic Sans MS,cursive';
+ctx.fillStyle='#FF69B4';ctx.fillText('Evie',sx,sy+sh*0.28);
+ctx.font='bold '+Math.round(fs*0.6)+'px Fredoka One,Comic Sans MS,cursive';
+ctx.fillStyle='#FFD700';ctx.shadowColor='rgba(255,215,0,0.7)';
+ctx.fillText('is turning',sx,sy+sh*0.5);
+ctx.font='bold '+Math.round(fs*1.3)+'px Fredoka One,Comic Sans MS,cursive';
+ctx.fillStyle='#fff';ctx.shadowColor='rgba(255,255,255,0.7)';ctx.shadowBlur=12;
 ctx.fillText('7!',sx,sy+sh*0.76);
-ctx.shadowBlur=0;
 } else {
-// Normal movie colors
+// Animated movie colors
 const gr=ctx.createLinearGradient(sx-sw/2,sy,sx+sw/2,sy+sh);
 const h1=(t*30)%360,h2=(h1+120)%360,h3=(h1+240)%360;
 gr.addColorStop(0,`hsla(${h1},70%,65%,0.6)`);gr.addColorStop(0.5,`hsla(${h2},70%,65%,0.6)`);
 gr.addColorStop(1,`hsla(${h3},70%,65%,0.6)`);ctx.fillStyle=gr;
-roundRect(sx-sw/2+4,sy+4,sw-8,sh-8,1);ctx.fill();
+ctx.fillRect(sx-sw/2,sy,sw,sh);
 }
-// Screen light on lawn
-ctx.globalAlpha=fp*0.08;const bm=ctx.createRadialGradient(sx,sy+sh/2,sh*0.3,sx,sy+sh,sh*2.5);
+ctx.restore();// end clip
+// Screen glow on lawn
+ctx.save();ctx.globalAlpha=fp*0.07;
+const bm=ctx.createRadialGradient(sx,sy+sh/2,sh*0.3,sx,sy+sh,sh*2);
 bm.addColorStop(0,'rgba(255,255,255,0.3)');bm.addColorStop(1,'rgba(255,255,255,0)');
-ctx.fillStyle=bm;ctx.fillRect(sx-sw,sy,sw*2,sh*3);ctx.restore();}}ctx.restore();}
+ctx.fillStyle=bm;ctx.fillRect(sx-sw,sy,sw*2,sh*2.5);ctx.restore();
+}}ctx.restore();}
 
 function drawProjector(prog){if(prog<=0)return;ctx.save();ctx.globalAlpha=easeInOut(clamp01(prog));
 const px=W*0.4,py=H*0.6;
