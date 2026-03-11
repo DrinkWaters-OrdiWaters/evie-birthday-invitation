@@ -2,122 +2,178 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Evie's 7th Birthday - Outdoor Movie Night Under the Stars</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;600;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { overflow: hidden; background: #0a0e27; font-family: 'Quicksand', cursive; }
-  canvas { display: block; }
+  html, body {
+    overflow: hidden;
+    background: #0a0e27;
+    font-family: 'Quicksand', 'Comic Sans MS', sans-serif;
+    width: 100%; height: 100%;
+    position: fixed;
+    touch-action: manipulation;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: none;
+  }
+  canvas {
+    display: block;
+    width: 100%; height: 100%;
+    position: fixed; top: 0; left: 0;
+  }
 
-  /* ===== TEXT BANNER AT TOP ===== */
+  /* ===== TEXT BANNER — TOP ===== */
   #textBanner {
     position: fixed;
     top: 0; left: 0; right: 0;
     z-index: 10;
     pointer-events: none;
-    padding: 12px 20px;
+    padding: max(14px, env(safe-area-inset-top, 14px)) 20px 14px;
     text-align: center;
-    min-height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 90px;
   }
-
   .scene-text {
     opacity: 0;
-    transform: translateY(-30px);
+    transform: translateY(-25px);
     transition: opacity 1s ease, transform 1s ease;
     position: absolute;
-    width: 100%;
-    padding: 0 20px;
+    width: 100%; padding: 14px 24px;
+    background: linear-gradient(180deg, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.2) 70%, transparent 100%);
   }
-  .scene-text.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .scene-text.visible { opacity: 1; transform: translateY(0); }
 
   .scene-text h1 {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(1.6rem, 4.5vw, 3.5rem);
+    font-family: 'Fredoka One', 'Comic Sans MS', cursive, sans-serif;
+    font-size: clamp(1.5rem, 5vw, 3.5rem);
     color: #FF69B4;
-    text-shadow: 0 0 25px rgba(255,105,180,0.5), 0 2px 4px rgba(0,0,0,0.4);
-    margin-bottom: 0.1em;
+    text-shadow: 0 0 25px rgba(255,105,180,0.5), 0 2px 6px rgba(0,0,0,0.7);
+    margin-bottom: 0.2em;
+    line-height: 1.3;
+    letter-spacing: 1px;
   }
   .scene-text h2 {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(1.1rem, 3vw, 2.4rem);
+    font-family: 'Fredoka One', 'Comic Sans MS', cursive, sans-serif;
+    font-size: clamp(1.1rem, 3.5vw, 2.4rem);
     color: #FFD700;
-    text-shadow: 0 0 20px rgba(255,215,0,0.4), 0 2px 4px rgba(0,0,0,0.4);
-    margin-bottom: 0.15em;
+    text-shadow: 0 0 20px rgba(255,215,0,0.4), 0 2px 6px rgba(0,0,0,0.7);
+    margin-bottom: 0.2em;
+    line-height: 1.3;
+    letter-spacing: 0.5px;
   }
   .scene-text p {
-    font-size: clamp(0.8rem, 1.8vw, 1.3rem);
-    font-weight: 600; color: #fff;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-    margin: 0.15em 0;
-  }
-  .scene-text .emoji {
-    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
-    display: inline-block; margin: 0 0.1em;
+    font-size: clamp(0.8rem, 2vw, 1.3rem);
+    font-weight: 700; color: #fff;
+    text-shadow: 0 1px 6px rgba(0,0,0,0.7);
+    margin: 0.25em 0; line-height: 1.4;
+    letter-spacing: 0.3px;
   }
 
-  /* ===== INVITE DETAILS — bottom panel ===== */
+  /* ===== INVITE PANEL — BOTTOM ===== */
   #invitePanel {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 0;
-    transform: translateY(40px);
+    z-index: 10; pointer-events: none;
+    opacity: 0; transform: translateY(40px);
     transition: opacity 1.2s ease, transform 1.2s ease;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
-  #invitePanel.visible {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  #invitePanel.visible { opacity: 1; transform: translateY(0); }
   #invitePanel .inner {
-    background: rgba(10, 14, 39, 0.8);
-    backdrop-filter: blur(15px);
-    border-top: 2px solid rgba(255, 215, 0, 0.25);
-    padding: 14px 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 30px;
-    flex-wrap: wrap;
+    background: rgba(10,14,39,0.85);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
+    border-top: 2px solid rgba(255,215,0,0.2);
+    padding: 12px 16px;
+    text-align: center;
   }
   #invitePanel .invite-title {
-    font-family: 'Fredoka One', cursive;
-    font-size: clamp(1.2rem, 3vw, 2rem);
+    font-family: 'Fredoka One', cursive, sans-serif;
+    font-size: clamp(1.1rem, 3.5vw, 2rem);
     color: #FF69B4;
     text-shadow: 0 0 15px rgba(255,105,180,0.4);
-    white-space: nowrap;
+    display: block; margin-bottom: 6px;
+  }
+  #invitePanel .invite-row {
+    display: flex; flex-wrap: wrap;
+    justify-content: center; gap: 6px 16px;
+    margin-bottom: 4px;
   }
   #invitePanel .invite-detail {
-    font-size: clamp(0.75rem, 1.5vw, 1.1rem);
+    font-size: clamp(0.7rem, 1.8vw, 1.05rem);
     font-weight: 600; color: #fff;
-    white-space: nowrap;
     text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+    white-space: nowrap;
+  }
+  #invitePanel .invite-note {
+    font-size: clamp(0.65rem, 1.5vw, 0.9rem);
+    color: rgba(255,255,255,0.75);
+    font-weight: 600;
+    margin-top: 4px; line-height: 1.4;
   }
   #invitePanel .invite-small {
-    font-size: clamp(0.65rem, 1.2vw, 0.85rem);
-    color: rgba(255,255,255,0.6);
-    width: 100%;
-    text-align: center;
-    margin-top: 4px;
+    font-size: clamp(0.6rem, 1.3vw, 0.8rem);
+    color: rgba(255,255,255,0.5);
+    margin-top: 6px;
   }
 
   #replayBtn {
-    position: fixed; bottom: 100px; right: 20px; z-index: 100;
+    position: fixed; bottom: calc(130px + env(safe-area-inset-bottom, 0px));
+    right: 16px; z-index: 100;
     background: linear-gradient(135deg, #FF69B4, #FFD700);
-    border: none; border-radius: 50px; padding: 12px 24px;
-    color: white; font-family: 'Fredoka One', cursive; font-size: 0.95rem;
-    cursor: pointer; opacity: 0; transition: opacity 0.5s, transform 0.2s;
-    pointer-events: none; box-shadow: 0 4px 20px rgba(255,105,180,0.4);
+    border: none; border-radius: 50px; padding: 10px 20px;
+    color: white; font-family: 'Fredoka One', cursive, sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer; opacity: 0;
+    transition: opacity 0.5s, transform 0.2s;
+    pointer-events: none;
+    box-shadow: 0 4px 20px rgba(255,105,180,0.4);
+    -webkit-tap-highlight-color: transparent;
   }
   #replayBtn.visible { opacity: 1; pointer-events: all; }
-  #replayBtn:hover { transform: scale(1.08); }
+  #replayBtn:active { transform: scale(0.95); }
+
+  /* ===== MOBILE PORTRAIT ===== */
+  @media (max-width: 600px) {
+    #textBanner { padding-top: max(10px, env(safe-area-inset-top, 10px)); min-height: 70px; }
+    .scene-text { padding: 10px 16px; }
+    .scene-text h1 { font-size: clamp(1.3rem, 6vw, 2.5rem); }
+    .scene-text h2 { font-size: clamp(1rem, 5vw, 1.8rem); }
+    .scene-text p { font-size: clamp(0.75rem, 3.2vw, 1rem); }
+    #invitePanel .inner { padding: 10px 12px; }
+    #invitePanel .invite-title { font-size: clamp(1rem, 5vw, 1.6rem); }
+    #invitePanel .invite-detail { font-size: clamp(0.65rem, 2.8vw, 0.9rem); }
+    #invitePanel .invite-note { font-size: clamp(0.6rem, 2.5vw, 0.8rem); }
+    #invitePanel .invite-row { gap: 4px 10px; }
+    #replayBtn { bottom: calc(120px + env(safe-area-inset-bottom, 0px)); padding: 8px 16px; font-size: 0.75rem; }
+  }
+
+  /* ===== VERY SMALL (iPhone SE, etc.) ===== */
+  @media (max-width: 380px) {
+    .scene-text h1 { font-size: 1.2rem; }
+    .scene-text h2 { font-size: 0.9rem; }
+    #invitePanel .invite-detail { font-size: 0.6rem; }
+  }
+
+  /* ===== LANDSCAPE MOBILE ===== */
+  @media (max-height: 500px) {
+    .scene-text h1 { font-size: clamp(1rem, 4vh, 2rem); }
+    .scene-text h2 { font-size: clamp(0.8rem, 3vh, 1.5rem); }
+    .scene-text p { font-size: clamp(0.65rem, 2.5vh, 0.9rem); }
+    #invitePanel .inner { padding: 6px 12px; }
+    #invitePanel .invite-title { font-size: 1rem; margin-bottom: 2px; }
+    #invitePanel .invite-detail { font-size: 0.6rem; }
+    #invitePanel .invite-note { font-size: 0.55rem; margin-top: 2px; }
+    #invitePanel .invite-small { font-size: 0.5rem; margin-top: 3px; }
+    #replayBtn { bottom: calc(80px + env(safe-area-inset-bottom, 0px)); padding: 6px 14px; font-size: 0.7rem; }
+  }
 </style>
 </head>
 <body>
@@ -126,23 +182,19 @@
 <!-- TOP TEXT BANNER -->
 <div id="textBanner">
   <div class="scene-text" id="text-intro">
-    <span class="emoji">🎬</span> <span class="emoji">✨</span>
     <h1>You're Invited!</h1>
-    <p>to a magical evening under the stars...</p>
+    <p>to a magical evening under the stars</p>
   </div>
   <div class="scene-text" id="text-transform">
     <h2>When night falls...</h2>
     <p>the garden transforms into a magical outdoor cinema</p>
-    <span class="emoji">🌙</span>
   </div>
   <div class="scene-text" id="text-cinema">
-    <span class="emoji">🍿</span> <span class="emoji">🌟</span> <span class="emoji">🎥</span>
     <h2>Magical Movie Night Under the Stars</h2>
-    <p>Cozy mattresses, popcorn & a movie under the sky!</p>
+    <p>Cozy mattresses, sleeping bags, popcorn & a movie under the sky!</p>
   </div>
   <div class="scene-text" id="text-final">
     <h1>Evie is turning 7!</h1>
-    <span class="emoji">🎂</span> <span class="emoji">🎈</span> <span class="emoji">🎉</span>
   </div>
 </div>
 
@@ -151,12 +203,19 @@
   <div class="inner">
     <!-- ====== EDIT YOUR DETAILS HERE ====== -->
     <span class="invite-title">Evie's 7th Birthday!</span>
-    <span class="invite-detail">📅 Saturday, April 5th 2026</span>
-    <span class="invite-detail">🕐 From 5:00 PM</span>
-    <span class="invite-detail">📍 At Evie's house</span>
-    <span class="invite-detail">🎬 Outdoor Movie + Sleepover</span>
-    <span class="invite-detail">🛏️ Mattresses, blankets & popcorn</span>
-    <span class="invite-small">Please RSVP to 06 XX XX XX XX 💌</span>
+    <div class="invite-row">
+      <span class="invite-detail">📅 Saturday, May 4th 2026</span>
+      <span class="invite-detail">🕕 Drop-off at 6:00 PM</span>
+      <span class="invite-detail">📍 At Evie's house</span>
+    </div>
+    <div class="invite-row">
+      <span class="invite-detail">🎬 Outdoor Movie Night — 90 min before Sundown!</span>
+    </div>
+    <p class="invite-note">
+      ⛺ Sleepover is optional — you choose!<br>
+      Tent, sleeping bags & breakfast provided 🥞
+    </p>
+    <p class="invite-small">Please RSVP to 06 XX XX XX XX 💌</p>
     <!-- ====== END ====== -->
   </div>
 </div>
@@ -164,11 +223,27 @@
 <button id="replayBtn" onclick="location.reload()">🔄 Replay</button>
 
 <script>
+// ============ CANVAS — HiDPI / Retina support ============
 const canvas = document.getElementById('scene');
 const ctx = canvas.getContext('2d');
-let W, H;
-function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-resize(); window.addEventListener('resize', resize);
+let W, H, DPR;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2); // Cap at 2x for performance
+  W = window.innerWidth;
+  H = window.innerHeight;
+  canvas.width = W * DPR;
+  canvas.height = H * DPR;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+resize();
+window.addEventListener('resize', resize);
+// iOS Safari viewport resize on scroll
+window.addEventListener('orientationchange', () => setTimeout(resize, 200));
+
+// Prevent pull-to-refresh & bounce on iOS
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
 
 // ============ UTILS ============
 function lerp(a,b,t){return a+(b-a)*clamp01(t)}
@@ -192,91 +267,79 @@ function drawStarShape(cx,cy,spikes,outerR,innerR){
 }
 
 // ============ PARTICLES ============
-const stars=Array.from({length:180},()=>({
+const stars=Array.from({length:150},()=>({
   x:Math.random(),y:Math.random()*0.45,size:Math.random()*2.5+0.5,
   tw:Math.random()*Math.PI*2,sp:Math.random()*2+0.8,big:Math.random()>0.87
 }));
 const shootingStars=[];
 function maybeShootingStar(){if(Math.random()<0.004&&shootingStars.length<2)shootingStars.push({
   x:Math.random()*W*0.7,y:Math.random()*H*0.25,vx:5+Math.random()*4,vy:2+Math.random()*2,life:1,dec:0.015+Math.random()*0.01});}
-const fireflies=Array.from({length:35},()=>({x:Math.random(),y:0.45+Math.random()*0.4,size:Math.random()*2.5+1,ph:Math.random()*Math.PI*2}));
+const fireflies=Array.from({length:30},()=>({x:Math.random(),y:0.45+Math.random()*0.4,size:Math.random()*2.5+1,ph:Math.random()*Math.PI*2}));
 const confetti=[];
 function spawnConfetti(){const c=['#FF69B4','#FFD700','#87CEEB','#98FB98','#DDA0DD','#FF6B6B','#FFE066','#FF8C42'];
-for(let i=0;i<100;i++)confetti.push({x:Math.random()*W,y:-20-Math.random()*300,w:Math.random()*10+4,h:Math.random()*6+3,
+for(let i=0;i<80;i++)confetti.push({x:Math.random()*W,y:-20-Math.random()*300,w:Math.random()*10+4,h:Math.random()*6+3,
 color:c[Math.floor(Math.random()*c.length)],sy:Math.random()*2.5+1.5,sx:(Math.random()-0.5)*2,rot:Math.random()*360,rs:(Math.random()-0.5)*8});}
 
 // ============ KIDS ============
 const KIDS = [
-  { color: '#FF69B4', hair: '#4a2a1a', skin: '#FDDCB5', name: 'k1' },
-  { color: '#4D96FF', hair: '#FFD700', skin: '#F5C9A8', name: 'k2' },
-  { color: '#6BCB77', hair: '#8B4513', skin: '#E8B896', name: 'k3' },
-  { color: '#FFD93D', hair: '#222', skin: '#FDDCB5', name: 'k4' },
-  { color: '#DDA0DD', hair: '#D4573B', skin: '#F5C9A8', name: 'k5' },
+  { color: '#FF69B4', hair: '#4a2a1a', skin: '#FDDCB5' },
+  { color: '#4D96FF', hair: '#FFD700', skin: '#F5C9A8' },
+  { color: '#6BCB77', hair: '#8B4513', skin: '#E8B896' },
+  { color: '#FFD93D', hair: '#222',    skin: '#FDDCB5' },
+  { color: '#DDA0DD', hair: '#D4573B', skin: '#F5C9A8' },
 ];
 
-// Kid states: running, walking-to-seat, sitting, eating-popcorn
 const kidStates = KIDS.map((k, i) => ({
   ...k,
-  // Running phase positions (normalized 0-1 of lawn area)
-  runX: 0.1 + Math.random() * 0.5,
-  runY: 0.72 + Math.random() * 0.12,
+  runX: 0.08 + Math.random() * 0.45,
+  runY: 0.7 + Math.random() * 0.12,
   runDir: Math.random() > 0.5 ? 1 : -1,
   runSpeed: 0.0004 + Math.random() * 0.0003,
   bouncePhase: Math.random() * Math.PI * 2,
-  // Seat target
-  seatX: 0.12 + (i % 3) * 0.1 + (i >= 3 ? 0.05 : 0),
-  seatY: i < 3 ? 0.73 : 0.78,
-  // State
-  state: 'running', // running, walking, sitting
+  seatX: 0.1 + (i % 3) * 0.09 + (i >= 3 ? 0.045 : 0),
+  seatY: i < 3 ? 0.72 : 0.77,
+  state: 'running',
   walkProgress: 0,
-  armWave: Math.random() * Math.PI * 2,
-  hasPopcorn: i < 2, // first two kids eat popcorn
+  hasPopcorn: i < 2,
 }));
 
 function drawKid(x, y, kid, t, sitting, walking, facingRight) {
   ctx.save();
   ctx.translate(x, y);
-  const scale = H * 0.0006;
+  const scale = Math.min(H, W) * 0.0007;
   ctx.scale(scale, scale);
-  if (!facingRight) { ctx.scale(-1, 1); }
+  if (!facingRight) ctx.scale(-1, 1);
 
   const bounce = sitting ? 0 : Math.sin(t * 8 + kid.bouncePhase) * 3;
   const legSwing = sitting ? 0 : Math.sin(t * 8 + kid.bouncePhase) * 20;
   const armSwing = sitting ? 0 : Math.sin(t * 8 + kid.bouncePhase + Math.PI) * 15;
 
   // Shadow
-  ctx.save(); ctx.globalAlpha = 0.15;
+  ctx.save(); ctx.globalAlpha = 0.12;
   ctx.fillStyle = '#000';
-  ctx.beginPath(); ctx.ellipse(0, 48, 14, 4, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0, 48, 12, 3.5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.restore();
 
   // Legs
-  ctx.strokeStyle = kid.skin;
-  ctx.lineWidth = 5;
-  ctx.lineCap = 'round';
+  ctx.strokeStyle = kid.skin; ctx.lineWidth = 5; ctx.lineCap = 'round';
   if (sitting) {
-    // Legs stretched forward
     ctx.beginPath(); ctx.moveTo(-5, 35); ctx.lineTo(-8, 48); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(5, 35); ctx.lineTo(8, 48); ctx.stroke();
   } else {
-    ctx.save();
     ctx.beginPath(); ctx.moveTo(-4, 32);
-    ctx.lineTo(-4 + Math.sin(legSwing * Math.PI/180) * 10, 48);
-    ctx.stroke();
+    ctx.lineTo(-4 + Math.sin(legSwing * Math.PI / 180) * 10, 48); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(4, 32);
-    ctx.lineTo(4 - Math.sin(legSwing * Math.PI/180) * 10, 48);
-    ctx.stroke();
-    ctx.restore();
+    ctx.lineTo(4 - Math.sin(legSwing * Math.PI / 180) * 10, 48); ctx.stroke();
   }
 
   // Shoes
   ctx.fillStyle = '#333';
   if (sitting) {
-    ctx.beginPath(); ctx.arc(-8, 48, 4, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(8, 48, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(-8, 48, 3.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(8, 48, 3.5, 0, Math.PI * 2); ctx.fill();
   }
 
-  // Body (t-shirt)
+  // Body
   ctx.fillStyle = kid.color;
   ctx.beginPath();
   ctx.moveTo(-10, 10 + bounce); ctx.lineTo(10, 10 + bounce);
@@ -284,30 +347,23 @@ function drawKid(x, y, kid, t, sitting, walking, facingRight) {
   ctx.closePath(); ctx.fill();
 
   // Arms
-  ctx.strokeStyle = kid.skin;
-  ctx.lineWidth = 4.5;
+  ctx.strokeStyle = kid.skin; ctx.lineWidth = 4.5;
   if (sitting && kid.hasPopcorn) {
-    // Arm holding popcorn toward mouth
     const eatBob = Math.sin(t * 3 + kid.bouncePhase) * 3;
     ctx.beginPath(); ctx.moveTo(-10, 16 + bounce);
     ctx.lineTo(-18, 8 + bounce + eatBob); ctx.stroke();
-    // Popcorn piece near mouth
     ctx.fillStyle = '#FFF8DC';
     ctx.beginPath(); ctx.arc(-18, 4 + bounce + eatBob, 3, 0, Math.PI * 2); ctx.fill();
-    // Other arm relaxed
     ctx.strokeStyle = kid.skin;
-    ctx.beginPath(); ctx.moveTo(10, 16 + bounce);
-    ctx.lineTo(15, 28 + bounce); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(10, 16 + bounce); ctx.lineTo(15, 28 + bounce); ctx.stroke();
   } else if (sitting) {
-    // Arms resting
     ctx.beginPath(); ctx.moveTo(-10, 16 + bounce); ctx.lineTo(-14, 30 + bounce); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(10, 16 + bounce); ctx.lineTo(14, 30 + bounce); ctx.stroke();
   } else {
-    // Swinging arms
     ctx.beginPath(); ctx.moveTo(-10, 15 + bounce);
-    ctx.lineTo(-10 - Math.sin(armSwing * Math.PI/180) * 12, 30 + bounce); ctx.stroke();
+    ctx.lineTo(-10 - Math.sin(armSwing * Math.PI / 180) * 12, 30 + bounce); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(10, 15 + bounce);
-    ctx.lineTo(10 + Math.sin(armSwing * Math.PI/180) * 12, 30 + bounce); ctx.stroke();
+    ctx.lineTo(10 + Math.sin(armSwing * Math.PI / 180) * 12, 30 + bounce); ctx.stroke();
   }
 
   // Head
@@ -317,7 +373,6 @@ function drawKid(x, y, kid, t, sitting, walking, facingRight) {
   // Hair
   ctx.fillStyle = kid.hair;
   ctx.beginPath(); ctx.arc(0, -2 + bounce, 12, Math.PI, Math.PI * 2); ctx.fill();
-  // Hair puff
   ctx.beginPath(); ctx.arc(0, -6 + bounce, 8, 0, Math.PI * 2); ctx.fill();
 
   // Eyes
@@ -327,57 +382,30 @@ function drawKid(x, y, kid, t, sitting, walking, facingRight) {
   ctx.beginPath(); ctx.ellipse(4, 2 + bounce, 1.5, blink, 0, 0, Math.PI * 2); ctx.fill();
 
   // Smile
-  ctx.strokeStyle = '#c44';
-  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = '#c44'; ctx.lineWidth = 1.5;
   ctx.beginPath(); ctx.arc(0, 5 + bounce, 5, 0.1 * Math.PI, 0.9 * Math.PI); ctx.stroke();
 
   ctx.restore();
 }
 
-function updateAndDrawKids(t, cinemaProgress, skyP) {
+function updateAndDrawKids(t, cinP, skyP) {
   kidStates.forEach((kid, i) => {
-    // State transitions
-    if (cinemaProgress > 0.3 && kid.state === 'running') {
-      kid.state = 'walking';
-      kid.walkProgress = 0;
-    }
+    if (cinP > 0.3 && kid.state === 'running') { kid.state = 'walking'; kid.walkProgress = 0; }
+    if (kid.state === 'walking') { kid.walkProgress += 0.008; if (kid.walkProgress >= 1) { kid.state = 'sitting'; kid.walkProgress = 1; } }
 
-    if (kid.state === 'walking') {
-      kid.walkProgress += 0.008;
-      if (kid.walkProgress >= 1) {
-        kid.state = 'sitting';
-        kid.walkProgress = 1;
-      }
-    }
-
-    let drawX, drawY, sitting, facingRight;
-
+    let dx, dy, sit, fr;
     if (kid.state === 'running') {
-      // Running around on the lawn
       kid.runX += kid.runSpeed * kid.runDir;
-      if (kid.runX > 0.6 || kid.runX < 0.05) {
-        kid.runDir *= -1;
-        kid.runSpeed = 0.0003 + Math.random() * 0.0004;
-      }
-      drawX = kid.runX * W;
-      drawY = kid.runY * H + Math.sin(t * 2 + i) * 3;
-      sitting = false;
-      facingRight = kid.runDir > 0;
+      if (kid.runX > 0.55 || kid.runX < 0.04) { kid.runDir *= -1; kid.runSpeed = 0.0003 + Math.random() * 0.0004; }
+      dx = kid.runX * W; dy = kid.runY * H + Math.sin(t * 2 + i) * 3; sit = false; fr = kid.runDir > 0;
     } else if (kid.state === 'walking') {
       const wp = easeInOut(kid.walkProgress);
-      drawX = lerp(kid.runX * W, kid.seatX * W, wp);
-      drawY = lerp(kid.runY * H, kid.seatY * H, wp);
-      sitting = false;
-      facingRight = kid.seatX * W > kid.runX * W;
+      dx = lerp(kid.runX * W, kid.seatX * W, wp); dy = lerp(kid.runY * H, kid.seatY * H, wp);
+      sit = false; fr = kid.seatX * W > kid.runX * W;
     } else {
-      // Sitting
-      drawX = kid.seatX * W;
-      drawY = kid.seatY * H;
-      sitting = true;
-      facingRight = true; // Facing the screen
+      dx = kid.seatX * W; dy = kid.seatY * H; sit = true; fr = true;
     }
-
-    drawKid(drawX, drawY, kid, t, sitting, kid.state === 'walking', facingRight);
+    drawKid(dx, dy, kid, t, sit, kid.state === 'walking', fr);
   });
 }
 
@@ -420,81 +448,65 @@ ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.vx*8,s.y-s.vy*8);ctx.stroke
 function drawGround(p){
   const gy=H*0.58;ctx.fillStyle=lerpColor('#5cb85c','#1a3d1c',p);ctx.fillRect(0,gy,W,H-gy);
   ctx.save();ctx.globalAlpha=0.06;ctx.fillStyle=lerpColor('#3a8a3a','#0d2a0d',p);
-  for(let i=0;i<10;i++){ctx.fillRect(0,gy+(H-gy)*(i/10),W,2);}ctx.restore();
+  for(let i=0;i<10;i++)ctx.fillRect(0,gy+(H-gy)*(i/10),W,2);ctx.restore();
 }
-
 function drawHedge(p){
   const hy=H*0.4,hh=H*0.2;ctx.fillStyle=lerpColor('#2d8a2d','#0f3310',p);
   ctx.beginPath();ctx.moveTo(0,hy+hh);
-  for(let x=0;x<=W;x+=4){ctx.lineTo(x,hy+Math.sin(x*0.015)*7+Math.sin(x*0.04)*3);}
+  for(let x=0;x<=W;x+=5)ctx.lineTo(x,hy+Math.sin(x*0.015)*7+Math.sin(x*0.04)*3);
   ctx.lineTo(W,hy+hh);ctx.closePath();ctx.fill();
-  ctx.save();ctx.globalAlpha=0.15;ctx.fillStyle=lerpColor('#4CAF50','#1a5a1a',p);
-  for(let x=0;x<W;x+=20){const w=Math.sin(x*0.015)*7+Math.sin(x*0.04)*3;
-  ctx.beginPath();ctx.arc(x,hy+w+6,10,0,Math.PI*2);ctx.fill();}ctx.restore();
+  ctx.save();ctx.globalAlpha=0.12;ctx.fillStyle=lerpColor('#4CAF50','#1a5a1a',p);
+  for(let x=0;x<W;x+=22){const w=Math.sin(x*0.015)*7+Math.sin(x*0.04)*3;
+  ctx.beginPath();ctx.arc(x,hy+w+6,9,0,Math.PI*2);ctx.fill();}ctx.restore();
 }
-
 function drawGlassFence(p){
   const fy=H*0.54,fh=H*0.05,sx=W*0.03,ex=W*0.6;ctx.save();
   ctx.fillStyle=lerpColor('#888','#444',p);
   for(let x=sx;x<=ex;x+=(ex-sx)/6)ctx.fillRect(x-1.5,fy-fh,3,fh+4);
   ctx.globalAlpha=0.12;ctx.fillStyle=lerpColor('#a0d8ef','#5080a0',p);
   ctx.fillRect(sx,fy-fh+4,ex-sx,fh-6);
-  ctx.globalAlpha=0.2;ctx.strokeStyle='#fff';ctx.lineWidth=1;
+  ctx.globalAlpha=0.18;ctx.strokeStyle='#fff';ctx.lineWidth=1;
   ctx.beginPath();ctx.moveTo(sx+8,fy-fh/2);ctx.lineTo(ex-8,fy-fh/2);ctx.stroke();ctx.restore();
 }
 
 // ============ HOUSE ============
-function drawHouse(p,t){
+function drawHouse(p){
   ctx.save();const hx=W*0.6,gy=H*0.58;
-  // Deck
   const dw=W*0.4;ctx.fillStyle=lerpColor('#8B7355','#4a3a28',p);
   ctx.fillRect(hx-dw*0.1,gy-2,dw,H*0.035);
   ctx.strokeStyle=lerpColor('#7a6348','#3d2e1e',p);ctx.lineWidth=1;
   for(let i=0;i<7;i++){const px=hx-dw*0.1+dw*(i/7);ctx.beginPath();ctx.moveTo(px,gy-2);ctx.lineTo(px,gy+H*0.03);ctx.stroke();}
-
-  // Main walls
   const hw=W*0.3,hh=H*0.23,hy=gy-hh;
   ctx.fillStyle=lerpColor('#4a4a4a','#2a2a2a',p);ctx.fillRect(hx,hy,hw,hh);
   const uh=hh*0.42;ctx.fillStyle=lerpColor('#555','#303030',p);ctx.fillRect(hx,hy,hw,uh);
-  // Roof
   ctx.fillStyle=lerpColor('#3a3a3a','#1a1a1a',p);ctx.fillRect(hx-12,hy-5,hw+24,7);
   ctx.fillRect(hx-6,hy+uh-2,hw+12,4);
-
-  // Upper windows (3)
   const wm=hw*0.05,wg=hw*0.03,uww=(hw-wm*2-wg*2)/3,uwh=uh*0.6,uwy=hy+uh*0.15;
   for(let i=0;i<3;i++){const wx=hx+wm+i*(uww+wg);
   ctx.fillStyle=lerpColor('#333','#1a1a1a',p);ctx.fillRect(wx-2,uwy-2,uww+4,uwh+4);
   if(p>0.6){const g=(p-0.6)/0.4;ctx.save();ctx.shadowColor='rgba(255,200,80,0.5)';ctx.shadowBlur=20*g;
   ctx.fillStyle=`rgba(255,220,100,${g*0.8})`;ctx.fillRect(wx,uwy,uww,uwh);ctx.restore();}
   else{ctx.fillStyle=lerpColor('#a8d8ea','#2a3a4a',p);ctx.fillRect(wx,uwy,uww,uwh);}}
-
-  // Lower sliding doors (2)
   const lww=(hw-wm*2-wg)/2,lwh=(hh-uh)*0.72,lwy=hy+uh+(hh-uh)*0.1;
   for(let i=0;i<2;i++){const wx=hx+wm+i*(lww+wg);
   ctx.fillStyle=lerpColor('#333','#1a1a1a',p);ctx.fillRect(wx-2,lwy-2,lww+4,lwh+4);
   if(p>0.6){const g=(p-0.6)/0.4;ctx.save();ctx.shadowColor='rgba(255,180,60,0.4)';ctx.shadowBlur=25*g;
   ctx.fillStyle=`rgba(255,210,90,${g*0.65})`;ctx.fillRect(wx,lwy,lww,lwh);ctx.restore();
-  ctx.save();ctx.globalAlpha=g*0.12;const sp=ctx.createRadialGradient(wx+lww/2,lwy+lwh,8,wx+lww/2,lwy+lwh+25,70);
+  ctx.save();ctx.globalAlpha=g*0.1;const sp=ctx.createRadialGradient(wx+lww/2,lwy+lwh,8,wx+lww/2,lwy+lwh+25,60);
   sp.addColorStop(0,'rgba(255,200,80,0.5)');sp.addColorStop(1,'rgba(255,200,80,0)');ctx.fillStyle=sp;
-  ctx.fillRect(wx-30,lwy+lwh,lww+60,70);ctx.restore();}
+  ctx.fillRect(wx-25,lwy+lwh,lww+50,60);ctx.restore();}
   else{ctx.fillStyle=lerpColor('#a8d8ea','#2a3a4a',p);ctx.fillRect(wx,lwy,lww,lwh);}}
-
-  // Pergola
   const pgx=hx-W*0.07,pgw=W*0.1,pgy=hy+uh*0.35;
   ctx.fillStyle=lerpColor('#666','#333',p);
   ctx.fillRect(pgx,pgy,5,gy-pgy);ctx.fillRect(pgx+pgw-5,pgy,5,gy-pgy);
   ctx.fillStyle=lerpColor('#555','#2a2a2a',p);ctx.fillRect(pgx-4,pgy-3,pgw+8,5);
-
-  // Topiaries
   const tc=lerpColor('#2d7a2d','#143a14',p);
   ctx.fillStyle=tc;ctx.beginPath();ctx.arc(hx-8,gy-20,18,0,Math.PI*2);ctx.fill();
   ctx.fillStyle=lerpColor('#6b5030','#3a2a18',p);ctx.fillRect(hx-10,gy-5,5,8);
   ctx.fillStyle=tc;ctx.beginPath();ctx.arc(hx+hw+12,gy-16,14,0,Math.PI*2);ctx.fill();
   ctx.fillStyle=lerpColor('#6b5030','#3a2a18',p);ctx.fillRect(hx+hw+10,gy-4,4,6);
-
   ctx.restore();
 }
-
 function drawBasketHoop(p){
   const bx=W*0.9,by=H*0.36;ctx.save();
   ctx.fillStyle=lerpColor('#999','#555',p);ctx.fillRect(bx-2,by,4,H*0.58-by);
@@ -503,7 +515,6 @@ function drawBasketHoop(p){
   ctx.strokeStyle=lerpColor('#FF4444','#992222',p);ctx.lineWidth=2;
   ctx.beginPath();ctx.arc(bx,by+20,8,0,Math.PI*2);ctx.stroke();ctx.restore();
 }
-
 function drawParasol(p){
   const px=W*0.78,py=H*0.43;ctx.save();
   ctx.fillStyle=lerpColor('#aaa','#555',p);ctx.fillRect(px-1.5,py,3,H*0.58-py+3);
@@ -530,7 +541,6 @@ const h1=(t*30)%360,h2=(h1+120)%360,h3=(h1+240)%360;
 gr.addColorStop(0,`hsla(${h1},70%,65%,0.6)`);gr.addColorStop(0.5,`hsla(${h2},70%,65%,0.6)`);
 gr.addColorStop(1,`hsla(${h3},70%,65%,0.6)`);ctx.fillStyle=gr;
 roundRect(sx-sw/2+4,sy+4,sw-8,sh-8,1);ctx.fill();
-// Screen light on lawn
 ctx.globalAlpha=fp*0.08;const bm=ctx.createRadialGradient(sx,sy+sh/2,sh*0.3,sx,sy+sh,sh*2.5);
 bm.addColorStop(0,'rgba(255,255,255,0.3)');bm.addColorStop(1,'rgba(255,255,255,0)');
 ctx.fillStyle=bm;ctx.fillRect(sx-sw,sy,sw*2,sh*3);ctx.restore();}}ctx.restore();}
@@ -546,13 +556,13 @@ ctx.lineTo(W*0.08,H*0.3+W*0.22*0.56);ctx.lineTo(px-12,py-3);ctx.closePath();ctx.
 ctx.restore();}
 
 function drawMattresses(prog){if(prog<=0)return;ctx.save();const p=easeInOut(clamp01(prog));ctx.globalAlpha=p;
-const bx=W*0.1,by=H*0.7,mw=W*0.085,mh=H*0.038;
+const bx=W*0.08,by=H*0.69,mw=W*0.085,mh=H*0.038;
 const mc=['#FF69B4','#87CEEB','#98FB98','#DDA0DD','#FFB347'];
 const bc=['#FF85C8','#6BB5E0','#7ED67E','#C8A0D0','#FFA030'];
 const pc=['#FFB6C1','#ADD8E6','#B0F0B0','#E6D0F0','#FFD090'];
 for(let i=0;i<5;i++){const row=i<3?0:1,col=i<3?i:i-3;
-const mx=bx+col*(mw+10)+row*(mw*0.55),my=by+row*(mh+14);
-ctx.save();ctx.globalAlpha=p*0.12;ctx.fillStyle='#000';roundRect(mx+2,my+2,mw,mh,5);ctx.fill();ctx.restore();
+const mx=bx+col*(mw+8)+row*(mw*0.5),my=by+row*(mh+12);
+ctx.save();ctx.globalAlpha=p*0.1;ctx.fillStyle='#000';roundRect(mx+2,my+2,mw,mh,5);ctx.fill();ctx.restore();
 ctx.fillStyle=mc[i];roundRect(mx,my,mw,mh,5);ctx.fill();
 ctx.fillStyle=bc[i];roundRect(mx+3,my+mh*0.45,mw-6,mh*0.45,3);ctx.fill();
 ctx.fillStyle=pc[i];roundRect(mx+mw*0.65,my+2,mw*0.25,mh*0.35,3);ctx.fill();}ctx.restore();}
@@ -578,13 +588,18 @@ ctx.beginPath();ctx.moveTo(tx-lw,ly);ctx.lineTo(tx+lw,ly);ctx.stroke();}ctx.rest
 ctx.fillStyle='rgba(15,10,25,0.75)';ctx.beginPath();ctx.moveTo(tx,top+th*0.38);
 ctx.quadraticCurveTo(tx-tw*0.1,ty,tx-tw*0.15,ty);ctx.lineTo(tx+tw*0.15,ty);
 ctx.quadraticCurveTo(tx+tw*0.1,ty,tx,top+th*0.38);ctx.closePath();ctx.fill();
+// Sleeping bags visible inside
+ctx.save();ctx.globalAlpha=0.5;
+ctx.fillStyle='#FF69B4';roundRect(tx-12,ty-10,10,16,3);ctx.fill();
+ctx.fillStyle='#4D96FF';roundRect(tx+2,ty-8,10,14,3);ctx.fill();
+ctx.restore();
 ctx.fillStyle='#FF69B4';ctx.beginPath();ctx.moveTo(tx,top);ctx.lineTo(tx+12,top+7);ctx.lineTo(tx,top+14);ctx.closePath();ctx.fill();
 ctx.restore();}
 
 function drawPopcornBowls(prog){if(prog<=0)return;ctx.save();ctx.globalAlpha=easeInOut(clamp01(prog));
-drawBucket(W*0.3,H*0.73);drawBucket(W*0.16,H*0.75);
-ctx.fillStyle='#FF6B6B';roundRect(W*0.25,H*0.74,6,11,2);ctx.fill();
-ctx.fillStyle='#87CEEB';roundRect(W*0.265,H*0.75,6,10,2);ctx.fill();ctx.restore();}
+drawBucket(W*0.3,H*0.72);drawBucket(W*0.15,H*0.74);
+ctx.fillStyle='#FF6B6B';roundRect(W*0.24,H*0.73,6,11,2);ctx.fill();
+ctx.fillStyle='#87CEEB';roundRect(W*0.255,H*0.74,6,10,2);ctx.fill();ctx.restore();}
 function drawBucket(bx,by){ctx.fillStyle='#FF3333';ctx.beginPath();
 ctx.moveTo(bx-8,by);ctx.lineTo(bx-11,by+18);ctx.lineTo(bx+11,by+18);ctx.lineTo(bx+8,by);ctx.closePath();ctx.fill();
 ctx.fillStyle='#CC0000';ctx.fillRect(bx-9,by+5,18,2.5);ctx.fillRect(bx-10,by+11,20,2.5);
@@ -626,13 +641,13 @@ function animate(ts){
   else if(cs.name==='invite')cinP=1;
 
   ctx.clearRect(0,0,W,H);
-  drawSky(skyP); drawSun(skyP); drawMoon(skyP); drawStars(skyP,t);
-  drawHedge(skyP); drawGround(skyP); drawGlassFence(skyP);
-  drawHouse(skyP,t); drawParasol(skyP); drawBasketHoop(skyP);
-  drawStringLights(cinP,t); drawScreen(cinP,t); drawProjector(cinP);
-  drawTent(cinP,skyP); drawMattresses(cinP); drawPopcornBowls(cinP);
+  drawSky(skyP);drawSun(skyP);drawMoon(skyP);drawStars(skyP,t);
+  drawHedge(skyP);drawGround(skyP);drawGlassFence(skyP);
+  drawHouse(skyP);drawParasol(skyP);drawBasketHoop(skyP);
+  drawStringLights(cinP,t);drawScreen(cinP,t);drawProjector(cinP);
+  drawTent(cinP,skyP);drawMattresses(cinP);drawPopcornBowls(cinP);
   updateAndDrawKids(t,cinP,skyP);
-  drawFireflies(t,skyP); drawConfetti();
+  drawFireflies(t,skyP);drawConfetti();
 
   if(cs.name==='day'&&sp>0.15)txEls.intro.classList.add('visible');
   if(cs.name==='sunset'&&sp>0.2)txEls.transform.classList.add('visible');
