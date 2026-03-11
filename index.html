@@ -193,9 +193,7 @@
     <h2>Magical Movie Night Under the Stars</h2>
     <p>Cozy mattresses, sleeping bags, popcorn & a movie under the sky!</p>
   </div>
-  <div class="scene-text" id="text-final">
-    <h1>Evie is turning 7!</h1>
-  </div>
+  <div class="scene-text" id="text-final"></div>
 </div>
 
 <!-- BOTTOM INVITE PANEL -->
@@ -527,7 +525,7 @@ function drawParasol(p){
 }
 
 // ============ CINEMA ELEMENTS ============
-function drawScreen(prog,t){if(prog<=0)return;const p=easeInOut(clamp01(prog));
+function drawScreen(prog,t,showTitle){if(prog<=0)return;const p=easeInOut(clamp01(prog));
 const sx=W*0.2,sy=H*0.3,sw=W*0.22*p,sh=sw*0.56;ctx.save();
 ctx.fillStyle='#444';ctx.fillRect(sx-1.5,sy-8,3,sh+48);
 ctx.beginPath();ctx.moveTo(sx,sy+sh+35);ctx.lineTo(sx-25,sy+sh+46);ctx.lineWidth=2.5;ctx.strokeStyle='#444';ctx.stroke();
@@ -536,11 +534,44 @@ if(sw>8){ctx.save();ctx.shadowColor='rgba(255,255,255,0.5)';ctx.shadowBlur=35*p;
 ctx.fillStyle='#FAFAFA';roundRect(sx-sw/2,sy,sw,sh,2);ctx.fill();ctx.restore();
 ctx.strokeStyle='#222';ctx.lineWidth=2.5;roundRect(sx-sw/2,sy,sw,sh,2);ctx.stroke();
 if(prog>0.4){const fp=clamp01((prog-0.4)/0.6);ctx.save();ctx.globalAlpha=fp;
+if(showTitle){
+// "Evie is turning 7!" on the screen with celebration colors
+const gr2=ctx.createLinearGradient(sx-sw/2,sy,sx+sw/2,sy+sh);
+gr2.addColorStop(0,'#1a0a2e');gr2.addColorStop(0.5,'#2d1b4e');gr2.addColorStop(1,'#1a0a2e');
+ctx.fillStyle=gr2;roundRect(sx-sw/2+3,sy+3,sw-6,sh-6,1);ctx.fill();
+// Sparkle dots on screen
+ctx.globalAlpha=fp*0.6;
+for(let i=0;i<12;i++){const angle=t*0.8+i*0.52;const radius=Math.min(sw,sh)*0.35;
+const sparkX=sx+Math.cos(angle)*radius*(0.5+Math.sin(i)*0.5);
+const sparkY=sy+sh/2+Math.sin(angle)*radius*0.4;
+const sparkSize=1.5+Math.sin(t*3+i*1.1)*1;
+ctx.fillStyle=i%3===0?'#FF69B4':i%3===1?'#FFD700':'#87CEEB';
+ctx.beginPath();ctx.arc(sparkX,sparkY,sparkSize,0,Math.PI*2);ctx.fill();}
+// Title text
+ctx.globalAlpha=fp;
+const fontSize=Math.max(8,sw*0.1);
+ctx.font=`bold ${fontSize}px Fredoka One, Comic Sans MS, cursive`;
+ctx.textAlign='center';ctx.textBaseline='middle';
+// Text shadow/glow
+ctx.shadowColor='rgba(255,105,180,0.8)';ctx.shadowBlur=15;
+ctx.fillStyle='#FF69B4';
+ctx.fillText('Evie',sx,sy+sh*0.32);
+ctx.font=`bold ${fontSize*0.65}px Fredoka One, Comic Sans MS, cursive`;
+ctx.fillStyle='#FFD700';ctx.shadowColor='rgba(255,215,0,0.8)';
+ctx.fillText('is turning',sx,sy+sh*0.52);
+ctx.font=`bold ${fontSize*1.4}px Fredoka One, Comic Sans MS, cursive`;
+ctx.fillStyle='#fff';ctx.shadowColor='rgba(255,255,255,0.8)';ctx.shadowBlur=20;
+ctx.fillText('7!',sx,sy+sh*0.76);
+ctx.shadowBlur=0;
+} else {
+// Normal movie colors
 const gr=ctx.createLinearGradient(sx-sw/2,sy,sx+sw/2,sy+sh);
 const h1=(t*30)%360,h2=(h1+120)%360,h3=(h1+240)%360;
 gr.addColorStop(0,`hsla(${h1},70%,65%,0.6)`);gr.addColorStop(0.5,`hsla(${h2},70%,65%,0.6)`);
 gr.addColorStop(1,`hsla(${h3},70%,65%,0.6)`);ctx.fillStyle=gr;
 roundRect(sx-sw/2+4,sy+4,sw-8,sh-8,1);ctx.fill();
+}
+// Screen light on lawn
 ctx.globalAlpha=fp*0.08;const bm=ctx.createRadialGradient(sx,sy+sh/2,sh*0.3,sx,sy+sh,sh*2.5);
 bm.addColorStop(0,'rgba(255,255,255,0.3)');bm.addColorStop(1,'rgba(255,255,255,0)');
 ctx.fillStyle=bm;ctx.fillRect(sx-sw,sy,sw*2,sh*3);ctx.restore();}}ctx.restore();}
@@ -644,7 +675,8 @@ function animate(ts){
   drawSky(skyP);drawSun(skyP);drawMoon(skyP);drawStars(skyP,t);
   drawHedge(skyP);drawGround(skyP);drawGlassFence(skyP);
   drawHouse(skyP);drawParasol(skyP);drawBasketHoop(skyP);
-  drawStringLights(cinP,t);drawScreen(cinP,t);drawProjector(cinP);
+  const isInviteScene = cs.name==='invite';
+  drawStringLights(cinP,t);drawScreen(cinP,t,isInviteScene);drawProjector(cinP);
   drawTent(cinP,skyP);drawMattresses(cinP);drawPopcornBowls(cinP);
   updateAndDrawKids(t,cinP,skyP);
   drawFireflies(t,skyP);drawConfetti();
