@@ -273,33 +273,36 @@ ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(s.x-s.vx*8,s.y-s.vy*8);ctx.stroke
 
 // ===== ENVIRONMENT =====
 function drawGround(p){const gy=H*.58;
-// Golf course green - lighter, manicured grass
-const g=ctx.createLinearGradient(0,gy,0,H);
-g.addColorStop(0,lerpColor('#6abe6a','#1e4a1e',p));g.addColorStop(1,lerpColor('#4da64d','#153515',p));
-ctx.fillStyle=g;ctx.fillRect(0,gy,W,H-gy);
-// Mowing stripes (golf course look)
-ctx.save();ctx.globalAlpha=.06;
-for(let i=0;i<12;i++){ctx.fillStyle=i%2===0?lerpColor('#7acc7a','#2a5a2a',p):lerpColor('#5cb85c','#1a3d1c',p);
-ctx.fillRect(0,gy+(H-gy)*(i/12),W,(H-gy)/12)}ctx.restore();
-// Golf holes with flags
-const holes=[{x:W*.02,y:H*.88},{x:W*.48,y:H*.92},{x:W*.82,y:H*.85}];
-holes.forEach((h,i)=>{
+// Normal green lawn
+ctx.fillStyle=lerpColor('#5cb85c','#1a3d1c',p);ctx.fillRect(0,gy,W,H-gy);
+ctx.save();ctx.globalAlpha=.05;ctx.fillStyle=lerpColor('#3a8a3a','#0d2a0d',p);
+for(let i=0;i<8;i++)ctx.fillRect(0,gy+(H-gy)*(i/8),W,2);ctx.restore()}
+
+// Golf course visible BEHIND the hedge (background)
+function drawGolfBehind(p){
 ctx.save();
-// Green circle (putting green)
-ctx.globalAlpha=.15;ctx.fillStyle=lerpColor('#8fd68f','#2d6a2d',p);
-ctx.beginPath();ctx.ellipse(h.x,h.y,W*.04,H*.015,0,0,Math.PI*2);ctx.fill();
+const gy=H*.42; // just above hedge line
+// Golf green strip behind hedge
+ctx.fillStyle=lerpColor('#7acc7a','#2a5a2a',p);
+ctx.fillRect(0,gy-H*.06,W,H*.06);
+// Mowing stripes
+ctx.globalAlpha=.08;
+for(let i=0;i<4;i++){ctx.fillStyle=i%2===0?lerpColor('#8fd68f','#3a6a3a',p):lerpColor('#6abe6a','#1e4a1e',p);
+ctx.fillRect(0,gy-H*.06+i*(H*.015),W,H*.015)}
 ctx.globalAlpha=1;
-// Hole
-ctx.fillStyle=lerpColor('#333','#111',p);ctx.beginPath();ctx.ellipse(h.x,h.y,4,2,0,0,Math.PI*2);ctx.fill();
-// Flag pole
-ctx.strokeStyle=lerpColor('#888','#444',p);ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(h.x,h.y);ctx.lineTo(h.x,h.y-H*.06);ctx.stroke();
-// Flag (triangular)
-const fc=['#FF3333','#FFD700','#FF69B4'][i];ctx.fillStyle=lerpColor(fc,'#993333',p);
-ctx.beginPath();ctx.moveTo(h.x,h.y-H*.06);ctx.lineTo(h.x+12,h.y-H*.05);ctx.lineTo(h.x,h.y-H*.04);ctx.closePath();ctx.fill();
-// Sand bunker near some holes
-if(i===0||i===2){ctx.globalAlpha=.25;ctx.fillStyle=lerpColor('#e8d5a3','#8a7a50',p);
-ctx.beginPath();ctx.ellipse(h.x+(i===0?25:-25),h.y+5,W*.02,H*.008,0,0,Math.PI*2);ctx.fill()}
-ctx.restore()})}
+// Golf flags peeking above the hedge
+const flags=[{x:W*.08,fy:gy-H*.1},{x:W*.35,fy:gy-H*.12},{x:W*.55,fy:gy-H*.09},{x:W*.78,fy:gy-H*.11}];
+flags.forEach((f,i)=>{
+ctx.strokeStyle=lerpColor('#aaa','#555',p);ctx.lineWidth=1.5;
+ctx.beginPath();ctx.moveTo(f.x,gy-H*.02);ctx.lineTo(f.x,f.fy);ctx.stroke();
+const fc=['#FF3333','#FFD700','#FF69B4','#4D96FF'][i];
+ctx.fillStyle=lerpColor(fc,lerpColor(fc,'#333',.5),p);
+ctx.beginPath();ctx.moveTo(f.x,f.fy);ctx.lineTo(f.x+10,f.fy+5);ctx.lineTo(f.x,f.fy+10);ctx.closePath();ctx.fill()});
+// Sand bunkers visible behind hedge
+ctx.globalAlpha=.2;ctx.fillStyle=lerpColor('#e8d5a3','#8a7a50',p);
+ctx.beginPath();ctx.ellipse(W*.22,gy-H*.03,W*.03,H*.01,0,0,Math.PI*2);ctx.fill();
+ctx.beginPath();ctx.ellipse(W*.65,gy-H*.025,W*.025,H*.008,0,0,Math.PI*2);ctx.fill();
+ctx.restore()}
 function drawHedge(p){const hy=H*.4,hh=H*.2;ctx.fillStyle=lerpColor('#2d8a2d','#0f3310',p);
 ctx.beginPath();ctx.moveTo(0,hy+hh);for(let x=0;x<=W;x+=5)ctx.lineTo(x,hy+Math.sin(x*.015)*7+Math.sin(x*.04)*3);
 ctx.lineTo(W,hy+hh);ctx.closePath();ctx.fill();ctx.save();ctx.globalAlpha=.12;ctx.fillStyle=lerpColor('#4CAF50','#1a5a1a',p);
@@ -453,7 +456,7 @@ function drawScreen(prog,t,screenPhase){
         ctx.fillText('7!',sx,sy+sh*.76);
 
       } else if(screenPhase==='movie'){
-        // Bugs Bunny style cartoon
+        // Comedy cartoon: Bunny chasing a scared hunter (Bugs Bunny style)
         // Sky blue background
         const skyG=ctx.createLinearGradient(sx-sw/2,sy,sx-sw/2,sy+sh);
         skyG.addColorStop(0,'#5bc0eb');skyG.addColorStop(1,'#9ce0ff');ctx.fillStyle=skyG;ctx.fillRect(sx-sw/2,sy,sw,sh);
@@ -461,54 +464,108 @@ function drawScreen(prog,t,screenPhase){
         ctx.fillStyle='#fff';ctx.globalAlpha=fp*.7;
         const cx1=sx-sw*.3+Math.sin(t*.5)*sw*.08;
         [[-0.1,0.12],[0,0.08],[0.1,0.1]].forEach(([ox,oy])=>{ctx.beginPath();ctx.arc(cx1+ox*sw,sy+sh*(.15+oy),sw*.04,0,Math.PI*2);ctx.fill()});
-        const cx2=sx+sw*.15+Math.sin(t*.3+2)*sw*.06;
-        [[-0.06,0.04],[0.04,0],[0.12,0.05]].forEach(([ox,oy])=>{ctx.beginPath();ctx.arc(cx2+ox*sw,sy+sh*(.1+oy),sw*.035,0,Math.PI*2);ctx.fill()});
         ctx.globalAlpha=fp;
         // Green ground
         ctx.fillStyle='#6abe45';ctx.fillRect(sx-sw/2,sy+sh*.72,sw,sh*.28);
         ctx.fillStyle='#5aa83a';ctx.fillRect(sx-sw/2,sy+sh*.72,sw,sh*.03);
-        // Cartoon bunny character (Bugs Bunny style)
-        const bx=sx-sw*.08+Math.sin(t*2)*sw*.12;
-        const by=sy+sh*.55+Math.abs(Math.sin(t*3.5))*sh*.12*-1;
-        const bs=sw*.035; // bunny scale
+        // Tree
+        ctx.fillStyle='#8B6914';ctx.fillRect(sx+sw*.28,sy+sh*.35,sw*.03,sh*.38);
+        ctx.fillStyle='#3a9a3a';ctx.beginPath();ctx.arc(sx+sw*.295,sy+sh*.32,sw*.07,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#2d8a2d';ctx.beginPath();ctx.arc(sx+sw*.28,sy+sh*.28,sw*.05,0,Math.PI*2);ctx.fill();
+
+        const bs=sw*.03; // character scale
+        // Chase cycle - both characters run across screen looping
+        const cycle=(t*1.2)%4; // 4-second chase loop
+        const runX=sx-sw*.45+cycle/4*sw*.9; // run left to right
+
+        // === HUNTER (running scared, in front) ===
+        const hx=runX+sw*.15, hy=sy+sh*.52;
+        const hBounce=Math.abs(Math.sin(t*10))*sh*.04;
+        // Legs running fast
+        ctx.strokeStyle='#8B6914';ctx.lineWidth=Math.max(1,bs*.18);ctx.lineCap='round';
+        const hLeg=Math.sin(t*12)*bs*1.5;
+        ctx.beginPath();ctx.moveTo(hx-bs*.3,hy+bs*2-hBounce);ctx.lineTo(hx-bs*.3+hLeg,hy+bs*3.5-hBounce);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(hx+bs*.3,hy+bs*2-hBounce);ctx.lineTo(hx+bs*.3-hLeg,hy+bs*3.5-hBounce);ctx.stroke();
+        // Body (red shirt)
+        ctx.fillStyle='#CC3333';ctx.beginPath();ctx.ellipse(hx,hy+bs*1.2-hBounce,bs*.9,bs*1.3,0,0,Math.PI*2);ctx.fill();
+        // Head (bald, round)
+        ctx.fillStyle='#F5C9A8';ctx.beginPath();ctx.arc(hx,hy-bs*.5-hBounce,bs*.9,0,Math.PI*2);ctx.fill();
+        // Hat flying off
+        ctx.fillStyle='#8B4513';ctx.beginPath();ctx.ellipse(hx+bs*.6,hy-bs*1.8-hBounce+Math.sin(t*5)*bs*.3,bs*.7,bs*.2,.3,0,Math.PI*2);ctx.fill();
+        ctx.fillRect(hx+bs*.3,hy-bs*1.6-hBounce+Math.sin(t*5)*bs*.3,bs*.5,bs*.3);
+        // Scared eyes (wide open)
+        ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(hx-bs*.3,hy-bs*.5-hBounce,bs*.25,bs*.35,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(hx+bs*.2,hy-bs*.5-hBounce,bs*.25,bs*.35,0,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#111';// Pupils looking back at bunny (scared!)
+        ctx.beginPath();ctx.arc(hx-bs*.38,hy-bs*.5-hBounce,bs*.1,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(hx+bs*.12,hy-bs*.5-hBounce,bs*.1,0,Math.PI*2);ctx.fill();
+        // Open scared mouth
+        ctx.fillStyle='#333';ctx.beginPath();ctx.ellipse(hx-bs*.1,hy+bs*.1-hBounce,bs*.2,bs*.35,0,0,Math.PI*2);ctx.fill();
+        // Sweat drops
+        ctx.fillStyle='#87CEEB';
+        ctx.beginPath();ctx.arc(hx+bs*.8,hy-bs*.3-hBounce+Math.sin(t*6)*bs*.2,bs*.12,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(hx+bs*1,hy+bs*.2-hBounce+Math.cos(t*7)*bs*.15,bs*.08,0,Math.PI*2);ctx.fill();
+        // Arms flailing
+        ctx.strokeStyle='#F5C9A8';ctx.lineWidth=Math.max(1,bs*.15);
+        ctx.beginPath();ctx.moveTo(hx-bs*.7,hy+bs*.5-hBounce);ctx.lineTo(hx-bs*1.5,hy-bs*.5-hBounce+Math.sin(t*8)*bs*.8);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(hx+bs*.7,hy+bs*.5-hBounce);ctx.lineTo(hx+bs*1.2,hy-bs*.2-hBounce+Math.cos(t*7)*bs*.6);ctx.stroke();
+
+        // === BUNNY (chasing, cool and smiling, behind hunter) ===
+        const bx=runX-sw*.05, by=sy+sh*.48;
+        const bBounce=Math.abs(Math.sin(t*10+1))*sh*.05;
         // Bunny body
-        ctx.fillStyle='#d0d0d0';ctx.beginPath();ctx.ellipse(bx,by+bs*1.5,bs*1.2,bs*1.8,0,0,Math.PI*2);ctx.fill();
-        // Bunny head
-        ctx.fillStyle='#d8d8d8';ctx.beginPath();ctx.arc(bx,by-bs*.2,bs*1.1,0,Math.PI*2);ctx.fill();
-        // Ears (long, floppy)
-        ctx.fillStyle='#d0d0d0';ctx.beginPath();ctx.ellipse(bx-bs*.4,by-bs*2.2,bs*.3,bs*1.2,-.15,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.ellipse(bx+bs*.4,by-bs*2.2,bs*.3,bs*1.2,.15,0,Math.PI*2);ctx.fill();
-        // Inner ears (pink)
-        ctx.fillStyle='#FFB6C1';ctx.beginPath();ctx.ellipse(bx-bs*.4,by-bs*2.2,bs*.15,bs*.8,-.15,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.ellipse(bx+bs*.4,by-bs*2.2,bs*.15,bs*.8,.15,0,Math.PI*2);ctx.fill();
-        // Bunny belly
-        ctx.fillStyle='#f0f0f0';ctx.beginPath();ctx.ellipse(bx,by+bs*1.6,bs*.7,bs*1.1,0,0,Math.PI*2);ctx.fill();
-        // Eyes
-        ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(bx-bs*.35,by-bs*.3,bs*.3,bs*.35,0,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.ellipse(bx+bs*.35,by-bs*.3,bs*.3,bs*.35,0,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle='#222';const look=Math.sin(t*1.5)*bs*.08;
-        ctx.beginPath();ctx.arc(bx-bs*.35+look,by-bs*.25,bs*.12,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.arc(bx+bs*.35+look,by-bs*.25,bs*.12,0,Math.PI*2);ctx.fill();
-        // Nose
-        ctx.fillStyle='#FF69B4';ctx.beginPath();ctx.ellipse(bx,by+bs*.15,bs*.15,bs*.1,0,0,Math.PI*2);ctx.fill();
-        // Mouth / big smile
-        ctx.strokeStyle='#555';ctx.lineWidth=1;ctx.beginPath();ctx.arc(bx,by+bs*.3,bs*.25,.1*Math.PI,.9*Math.PI);ctx.stroke();
+        ctx.fillStyle='#d0d0d0';ctx.beginPath();ctx.ellipse(bx,by+bs*1.5-bBounce,bs*1,bs*1.5,0,0,Math.PI*2);ctx.fill();
+        // Belly
+        ctx.fillStyle='#f0f0f0';ctx.beginPath();ctx.ellipse(bx,by+bs*1.8-bBounce,bs*.6,bs*.9,0,0,Math.PI*2);ctx.fill();
+        // Head
+        ctx.fillStyle='#d8d8d8';ctx.beginPath();ctx.arc(bx,by-bs*.1-bBounce,bs*.9,0,Math.PI*2);ctx.fill();
+        // Ears
+        ctx.fillStyle='#d0d0d0';ctx.beginPath();ctx.ellipse(bx-bs*.3,by-bs*1.8-bBounce,bs*.25,bs*1,-.1,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(bx+bs*.3,by-bs*1.8-bBounce+Math.sin(t*4)*bs*.15,bs*.25,bs*1,.1,0,Math.PI*2);ctx.fill();
+        // Inner ears
+        ctx.fillStyle='#FFB6C1';ctx.beginPath();ctx.ellipse(bx-bs*.3,by-bs*1.8-bBounce,bs*.12,bs*.65,-.1,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(bx+bs*.3,by-bs*1.8-bBounce+Math.sin(t*4)*bs*.15,bs*.12,bs*.65,.1,0,Math.PI*2);ctx.fill();
+        // Eyes (confident, half-closed, looking at hunter)
+        ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(bx+bs*.2,by-bs*.2-bBounce,bs*.25,bs*.2,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(bx+bs*.55,by-bs*.2-bBounce,bs*.25,bs*.2,0,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#222';
+        ctx.beginPath();ctx.arc(bx+bs*.28,by-bs*.18-bBounce,bs*.1,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(bx+bs*.6,by-bs*.18-bBounce,bs*.1,0,Math.PI*2);ctx.fill();
+        // Smug smile
+        ctx.strokeStyle='#555';ctx.lineWidth=Math.max(1,bs*.07);
+        ctx.beginPath();ctx.arc(bx+bs*.3,by+bs*.15-bBounce,bs*.3,.05*Math.PI,.95*Math.PI);ctx.stroke();
         // Buck teeth
-        ctx.fillStyle='#fff';ctx.fillRect(bx-bs*.1,by+bs*.28,bs*.08,bs*.15);ctx.fillRect(bx+bs*.02,by+bs*.28,bs*.08,bs*.15);
-        // Bunny feet
-        ctx.fillStyle='#d0d0d0';ctx.beginPath();ctx.ellipse(bx-bs*.6,by+bs*3.2,bs*.45,bs*.18,-.2,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.ellipse(bx+bs*.6,by+bs*3.2,bs*.45,bs*.18,.2,0,Math.PI*2);ctx.fill();
-        // Carrot in hand
-        const carX=bx+bs*1.5,carY=by+bs*.8+Math.sin(t*4)*bs*.2;
-        ctx.fillStyle='#FF8C00';ctx.beginPath();ctx.moveTo(carX,carY-bs*.3);ctx.lineTo(carX+bs*.15,carY+bs*.8);ctx.lineTo(carX-bs*.15,carY+bs*.8);ctx.closePath();ctx.fill();
-        // Carrot leaves
-        ctx.fillStyle='#4CAF50';ctx.beginPath();ctx.ellipse(carX-bs*.1,carY-bs*.45,bs*.08,bs*.2,-.3,0,Math.PI*2);ctx.fill();
-        ctx.beginPath();ctx.ellipse(carX+bs*.1,carY-bs*.45,bs*.08,bs*.2,.3,0,Math.PI*2);ctx.fill();
-        // Small flowers on ground
-        const flowerColors=['#FF69B4','#FFD700','#FF6B6B','#DDA0DD'];
-        for(let i=0;i<5;i++){const fx=sx-sw*.4+sw*(i*.2);const fy=sy+sh*.82+Math.sin(i*2)*sh*.04;
-        ctx.fillStyle=flowerColors[i%4];ctx.beginPath();ctx.arc(fx,fy,bs*.2,0,Math.PI*2);ctx.fill();
-        ctx.fillStyle='#FFD700';ctx.beginPath();ctx.arc(fx,fy,bs*.08,0,Math.PI*2);ctx.fill()}
+        ctx.fillStyle='#fff';ctx.fillRect(bx+bs*.2,by+bs*.2-bBounce,bs*.08,bs*.15);ctx.fillRect(bx+bs*.35,by+bs*.2-bBounce,bs*.08,bs*.15);
+        // Pink nose
+        ctx.fillStyle='#FF69B4';ctx.beginPath();ctx.ellipse(bx+bs*.4,by+bs*.05-bBounce,bs*.12,bs*.08,0,0,Math.PI*2);ctx.fill();
+        // Legs running
+        const bLeg=Math.sin(t*12+1)*bs*1.5;
+        ctx.strokeStyle='#d0d0d0';ctx.lineWidth=Math.max(1,bs*.2);
+        ctx.beginPath();ctx.moveTo(bx-bs*.2,by+bs*2.5-bBounce);ctx.lineTo(bx-bs*.2+bLeg,by+bs*3.8-bBounce);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(bx+bs*.2,by+bs*2.5-bBounce);ctx.lineTo(bx+bs*.2-bLeg,by+bs*3.8-bBounce);ctx.stroke();
+        // Big feet
+        ctx.fillStyle='#d0d0d0';
+        ctx.beginPath();ctx.ellipse(bx-bs*.2+bLeg,by+bs*3.8-bBounce,bs*.4,bs*.15,bLeg>0?.3:-.3,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(bx+bs*.2-bLeg,by+bs*3.8-bBounce,bs*.4,bs*.15,-bLeg>0?.3:-.3,0,Math.PI*2);ctx.fill();
+        // Carrot in hand (munching while chasing)
+        const carX=bx+bs*.9,carY=by+bs*.5-bBounce+Math.sin(t*6)*bs*.15;
+        ctx.fillStyle='#FF8C00';ctx.beginPath();ctx.moveTo(carX,carY);ctx.lineTo(carX+bs*.6,carY+bs*.15);ctx.lineTo(carX,carY+bs*.3);ctx.closePath();ctx.fill();
+        ctx.fillStyle='#4CAF50';ctx.beginPath();ctx.ellipse(carX-bs*.05,carY+bs*.05,bs*.06,bs*.18,-.4,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(carX+bs*.05,carY+bs*.15,bs*.06,bs*.15,.4,0,Math.PI*2);ctx.fill();
+
+        // Dust clouds behind bunny
+        ctx.globalAlpha=fp*.35;ctx.fillStyle='#d4c89a';
+        for(let i=0;i<4;i++){const dx=bx-sw*.08-i*bs*1.2+Math.sin(t*3+i)*bs*.5;
+        const dy=by+bs*3-bBounce+Math.cos(t*2+i*2)*bs*.4;
+        ctx.beginPath();ctx.arc(dx,dy,bs*(.5+Math.sin(t+i)*.2),0,Math.PI*2);ctx.fill()}
+        ctx.globalAlpha=fp;
+
+        // "HELP!" speech bubble from hunter
+        if(Math.sin(t*1.5)>.2){ctx.save();ctx.globalAlpha=fp*.85;
+        ctx.fillStyle='#fff';roundRect(hx+bs*.5,hy-bs*2.8-hBounce,sw*.12,sh*.1,3);ctx.fill();
+        ctx.fillStyle='#CC3333';const hfs=Math.max(5,Math.min(bs*.6,10));
+        ctx.font='bold '+hfs+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.fillText('HELP!',hx+bs*.5+sw*.06,hy-bs*2.3-hBounce);ctx.restore()}
 
       } else {
         // Default: animated colors
@@ -654,7 +711,7 @@ function animate(ts){
 
   ctx.clearRect(0,0,W,H);
   drawSky(skyP);drawSun(skyP);drawMoon(skyP);drawStars(skyP,t);
-  drawHedge(skyP);drawGround(skyP);drawGlassFence(skyP);
+  drawGolfBehind(skyP);drawHedge(skyP);drawGround(skyP);drawGlassFence(skyP);
   drawPool(skyP,t);
   drawHouse(skyP,dim);drawParasol(skyP);drawBasket(skyP);
   drawLights(cinP,t);drawScreen(cinP,t,screenPhase);drawProjector(cinP);
