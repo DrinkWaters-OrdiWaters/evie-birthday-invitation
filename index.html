@@ -553,10 +553,57 @@ function drawScreen(prog,t,screenPhase){
         ctx.fillStyle='#4CAF50';ctx.beginPath();ctx.ellipse(carX-bs*.05,carY+bs*.05,bs*.06,bs*.18,-.4,0,Math.PI*2);ctx.fill();
         ctx.beginPath();ctx.ellipse(carX+bs*.05,carY+bs*.15,bs*.06,bs*.15,.4,0,Math.PI*2);ctx.fill();
 
-        // Dust clouds behind bunny
+        // === PIG (chasing behind bunny, determined and angry) ===
+        const px=runX-sw*.25, py=sy+sh*.55;
+        const pBounce=Math.abs(Math.sin(t*10+2))*sh*.04;
+        // Pig body (round, pink)
+        ctx.fillStyle='#FFB6C1';ctx.beginPath();ctx.ellipse(px,py+bs*1.5-pBounce,bs*1.2,bs*1.4,0,0,Math.PI*2);ctx.fill();
+        // Lighter belly
+        ctx.fillStyle='#FFD1DC';ctx.beginPath();ctx.ellipse(px+bs*.1,py+bs*1.7-pBounce,bs*.7,bs*.9,0,0,Math.PI*2);ctx.fill();
+        // Head
+        ctx.fillStyle='#FFB6C1';ctx.beginPath();ctx.arc(px,py-pBounce,bs*1,0,Math.PI*2);ctx.fill();
+        // Ears (floppy, triangular)
+        ctx.fillStyle='#E8909A';
+        ctx.beginPath();ctx.moveTo(px-bs*.6,py-bs*.7-pBounce);ctx.lineTo(px-bs*1.1,py-bs*1.4-pBounce);ctx.lineTo(px-bs*.2,py-bs*.9-pBounce);ctx.closePath();ctx.fill();
+        ctx.beginPath();ctx.moveTo(px+bs*.3,py-bs*.7-pBounce);ctx.lineTo(px+bs*.8,py-bs*1.5-pBounce+Math.sin(t*5)*bs*.2);ctx.lineTo(px+bs*.7,py-bs*.8-pBounce);ctx.closePath();ctx.fill();
+        // Snout (big oval)
+        ctx.fillStyle='#F5A0AA';ctx.beginPath();ctx.ellipse(px+bs*.3,py+bs*.2-pBounce,bs*.45,bs*.3,0,0,Math.PI*2);ctx.fill();
+        // Nostrils
+        ctx.fillStyle='#D07080';
+        ctx.beginPath();ctx.ellipse(px+bs*.2,py+bs*.2-pBounce,bs*.08,bs*.1,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(px+bs*.45,py+bs*.2-pBounce,bs*.08,bs*.1,0,0,Math.PI*2);ctx.fill();
+        // Angry eyes (determined, eyebrows down)
+        ctx.fillStyle='#fff';ctx.beginPath();ctx.ellipse(px-bs*.15,py-bs*.2-pBounce,bs*.22,bs*.25,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(px+bs*.2,py-bs*.2-pBounce,bs*.22,bs*.25,0,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#222';
+        ctx.beginPath();ctx.arc(px-bs*.08,py-bs*.18-pBounce,bs*.09,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.arc(px+bs*.28,py-bs*.18-pBounce,bs*.09,0,Math.PI*2);ctx.fill();
+        // Angry eyebrows
+        ctx.strokeStyle='#555';ctx.lineWidth=Math.max(1,bs*.1);
+        ctx.beginPath();ctx.moveTo(px-bs*.35,py-bs*.55-pBounce);ctx.lineTo(px-bs*.05,py-bs*.4-pBounce);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(px+bs*.5,py-bs*.55-pBounce);ctx.lineTo(px+bs*.1,py-bs*.4-pBounce);ctx.stroke();
+        // Grumpy mouth
+        ctx.strokeStyle='#955';ctx.lineWidth=Math.max(1,bs*.06);
+        ctx.beginPath();ctx.arc(px+bs*.15,py+bs*.45-pBounce,bs*.15,1.1*Math.PI,1.9*Math.PI);ctx.stroke();
+        // Legs (short, stubby, running)
+        const pLeg=Math.sin(t*12+2)*bs*1.2;
+        ctx.strokeStyle='#FFB6C1';ctx.lineWidth=Math.max(1,bs*.25);ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(px-bs*.4,py+bs*2.5-pBounce);ctx.lineTo(px-bs*.4+pLeg,py+bs*3.5-pBounce);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(px+bs*.4,py+bs*2.5-pBounce);ctx.lineTo(px+bs*.4-pLeg,py+bs*3.5-pBounce);ctx.stroke();
+        // Hooves
+        ctx.fillStyle='#D07080';
+        ctx.beginPath();ctx.ellipse(px-bs*.4+pLeg,py+bs*3.5-pBounce,bs*.2,bs*.1,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(px+bs*.4-pLeg,py+bs*3.5-pBounce,bs*.2,bs*.1,0,0,Math.PI*2);ctx.fill();
+        // Curly tail
+        ctx.strokeStyle='#E8909A';ctx.lineWidth=Math.max(1,bs*.1);ctx.lineCap='round';
+        ctx.beginPath();const tailX=px-bs*1.1,tailY=py+bs*1-pBounce;
+        ctx.moveTo(tailX,tailY);ctx.quadraticCurveTo(tailX-bs*.4,tailY-bs*.6+Math.sin(t*8)*bs*.2,tailX-bs*.2,tailY-bs*.8);
+        ctx.quadraticCurveTo(tailX+bs*.1,tailY-bs*.4,tailX-bs*.3,tailY-bs*.2);ctx.stroke();
+
+        // Dust clouds behind pig (last in the chase)
         ctx.globalAlpha=fp*.35;ctx.fillStyle='#d4c89a';
-        for(let i=0;i<4;i++){const dx=bx-sw*.08-i*bs*1.2+Math.sin(t*3+i)*bs*.5;
-        const dy=by+bs*3-bBounce+Math.cos(t*2+i*2)*bs*.4;
+        for(let i=0;i<4;i++){const dx=px-sw*.08-i*bs*1.2+Math.sin(t*3+i)*bs*.5;
+        const dy=py+bs*3-pBounce+Math.cos(t*2+i*2)*bs*.4;
         ctx.beginPath();ctx.arc(dx,dy,bs*(.5+Math.sin(t+i)*.2),0,Math.PI*2);ctx.fill()}
         ctx.globalAlpha=fp;
 
