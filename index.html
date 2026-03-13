@@ -50,6 +50,29 @@
   #replayBtn.visible{opacity:1;pointer-events:all}
   #replayBtn:active{transform:scale(.95)}
 
+  #startOverlay{position:fixed;inset:0;z-index:200;background:linear-gradient(135deg,#1a0a2e,#0a0e27 50%,#1a0a2e);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
+  -webkit-tap-highlight-color:transparent}
+  #startOverlay .start-icon{width:90px;height:90px;border-radius:50%;
+  background:linear-gradient(135deg,#FF69B4,#FFD700);display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 40px rgba(255,105,180,0.5),0 0 80px rgba(255,215,0,0.2);
+  animation:pulse-start 2s ease-in-out infinite}
+  #startOverlay .start-icon::after{content:'';width:0;height:0;border-style:solid;border-width:18px 0 18px 30px;
+  border-color:transparent transparent transparent white;margin-left:5px}
+  #startOverlay h2{font-family:'Fredoka One',cursive;color:#FF69B4;font-size:clamp(1.5rem,5vw,2.5rem);
+  margin-top:24px;text-shadow:0 0 20px rgba(255,105,180,0.4)}
+  #startOverlay p{color:rgba(255,255,255,0.6);font-size:clamp(.8rem,2.5vw,1.1rem);font-weight:600;margin-top:8px}
+  @keyframes pulse-start{0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(255,105,180,0.5)}
+  50%{transform:scale(1.08);box-shadow:0 0 60px rgba(255,105,180,0.7),0 0 100px rgba(255,215,0,0.3)}}
+  #startOverlay.hidden{opacity:0;pointer-events:none;transition:opacity .5s ease}
+
+  #muteBtn{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:100;
+  background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:50%;width:40px;height:40px;
+  display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:#fff;
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;
+  opacity:0;transition:opacity .5s;pointer-events:none}
+  #muteBtn.visible{opacity:1;pointer-events:all}
+
   @media(max-width:600px){
     #textBanner{top:5%}.scene-text{padding:12px 20px;max-width:94%;border-radius:12px}
     .scene-text h1{font-size:clamp(1.3rem,6vw,2.5rem)}.scene-text h2{font-size:clamp(1rem,5vw,1.8rem)}
@@ -68,7 +91,14 @@
 </style>
 </head>
 <body>
+<div id="startOverlay">
+  <div class="start-icon"></div>
+  <h2>Evie's 7th Birthday!</h2>
+  <p>Tap to play</p>
+</div>
+
 <canvas id="scene"></canvas>
+<button id="muteBtn">🔊</button>
 
 <div id="textBanner">
   <div class="scene-text" id="text-intro"><h1>You're Invited!</h1><p>to a magical evening under the stars</p></div>
@@ -99,6 +129,108 @@ canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.width=W+'px';canvas.style.he
 resize();window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(resize,200));
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+
+// ===== MUSIC ENGINE (Web Audio API) =====
+let audioCtx,musicOn=true,masterGain;
+const muteBtn=document.getElementById('muteBtn');
+
+function initAudio(){
+  audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+  masterGain=audioCtx.createGain();masterGain.gain.value=0.35;
+  masterGain.connect(audioCtx.destination);
+  playHappyBirthday();
+  muteBtn.classList.add('visible');
+}
+
+muteBtn.addEventListener('click',()=>{
+  musicOn=!musicOn;
+  muteBtn.textContent=musicOn?'🔊':'🔇';
+  if(masterGain)masterGain.gain.linearRampToValueAtTime(musicOn?0.35:0,audioCtx.currentTime+0.2);
+});
+
+function playNote(freq,start,dur,type,vol){
+  const osc=audioCtx.createOscillator();
+  const gain=audioCtx.createGain();
+  osc.type=type||'triangle';osc.frequency.value=freq;
+  gain.gain.setValueAtTime(0,start);
+  gain.gain.linearRampToValueAtTime(vol||0.3,start+0.05);
+  gain.gain.setValueAtTime(vol||0.3,start+dur*0.7);
+  gain.gain.linearRampToValueAtTime(0,start+dur*0.95);
+  osc.connect(gain);gain.connect(masterGain);
+  osc.start(start);osc.stop(start+dur);
+}
+
+function playChord(freqs,start,dur,vol){
+  freqs.forEach(f=>playNote(f,start,dur,'sine',(vol||0.08)/freqs.length));
+}
+
+function playHappyBirthday(){
+  const t0=audioCtx.currentTime+0.3;
+  const bpm=110,b=60/bpm; // beat duration
+
+  // Note frequencies
+  const n={C4:261.63,D4:293.66,E4:329.63,F4:349.23,G4:392,A4:440,Bb4:466.16,C5:523.25,
+           F3:174.61,C3:130.81,G3:196,Bb3:233.08,D5:587.33};
+
+  // Happy Birthday melody (note, startBeat, durationBeats)
+  // Line 1: Hap-py birth-day to you
+  const melody=[
+    [n.C4,0,.75],[n.C4,.75,.25],[n.D4,1,1],[n.C4,2,1],[n.F4,3,1],[n.E4,4,2],
+    // Line 2: Hap-py birth-day to you
+    [n.C4,6,.75],[n.C4,6.75,.25],[n.D4,7,1],[n.C4,8,1],[n.G4,9,1],[n.F4,10,2],
+    // Line 3: Hap-py birth-day dear Evie
+    [n.C4,12,.75],[n.C4,12.75,.25],[n.C5,13,1],[n.A4,14,1],[n.F4,15,.75],[n.E4,15.75,.25],[n.D4,16,1.5],
+    // Line 4: Hap-py birth-day to you
+    [n.Bb4,18,.75],[n.Bb4,18.75,.25],[n.A4,19,1],[n.F4,20,1],[n.G4,21,1],[n.F4,22,2],
+  ];
+
+  // Background chords (root notes for warmth)
+  const chords=[
+    [[n.F3,n.C4,n.A4],0,6],
+    [[n.F3,n.C4,n.A4],6,6],
+    [[n.C3,n.E4,n.G4],12,3],
+    [[n.F3,n.A4,n.C5],15,3],
+    [[n.Bb3,n.D4,n.F4],18,2],
+    [[n.F3,n.C4,n.A4],20,2],
+    [[n.C3,n.E4,n.G4],22,2],
+  ];
+
+  // Play 3 loops to cover the full animation (~36s total, each loop ~14s)
+  for(let loop=0;loop<3;loop++){
+    const off=loop*24*b;
+    // Melody - bright music box tone
+    melody.forEach(([freq,beat,dur])=>{
+      playNote(freq,t0+off+beat*b,dur*b,'triangle',0.25);
+      // Subtle octave shimmer
+      playNote(freq*2,t0+off+beat*b,dur*b,'sine',0.04);
+    });
+    // Chords - warm pad
+    chords.forEach(([freqs,beat,dur])=>{
+      playChord(freqs,t0+off+beat*b,dur*b,0.1);
+    });
+    // Light bass
+    const bassNotes=[[n.F3,0,6],[n.F3,6,6],[n.C3,12,3],[n.F3,15,3],[n.Bb3,18,2],[n.F3,20,2],[n.C3,22,2]];
+    bassNotes.forEach(([freq,beat,dur])=>{
+      playNote(freq/2,t0+off+beat*b,dur*b,'sine',0.12);
+    });
+    // Gentle glockenspiel sparkles between phrases
+    if(loop<2){
+      [n.C5,n.E4,n.F4,n.A4].forEach((f,i)=>{
+        playNote(f*2,t0+off+(24+i*.4)*b,.3,'sine',0.05);
+      });
+    }
+  }
+}
+
+// ===== START OVERLAY =====
+const startOverlay=document.getElementById('startOverlay');
+let animStarted=false;
+startOverlay.addEventListener('click',()=>{
+  if(animStarted)return;animStarted=true;
+  startOverlay.classList.add('hidden');
+  initAudio();
+  requestAnimationFrame(animate);
+});
 
 // ===== UTILS =====
 function lerp(a,b,t){return a+(b-a)*clamp01(t)}
@@ -776,7 +908,6 @@ function animate(ts){
 
   requestAnimationFrame(animate);
 }
-requestAnimationFrame(animate);
 </script>
 </body>
 </html>
