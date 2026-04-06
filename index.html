@@ -13,7 +13,7 @@
   html,body{overflow:hidden;background:#0a0e27;font-family:'Quicksand','Comic Sans MS',sans-serif;
   width:100%;height:100%;position:fixed;touch-action:manipulation;-webkit-touch-callout:none;
   -webkit-user-select:none;user-select:none;overscroll-behavior:none}
-  #app{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden}
+  #app{position:fixed;top:0;left:0;width:100vw;height:100vh;height:100dvh;overflow:hidden}
   canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0}
 
   #textBanner{position:absolute;top:16%;left:0;right:0;z-index:10;pointer-events:none;padding:0 24px;
@@ -166,24 +166,18 @@ const appEl=document.getElementById('app');
 let W,H,DPR;
 function resize(){
   DPR=Math.min(window.devicePixelRatio||1,2);
-  const vv=window.visualViewport;
-  W=vv?vv.width:window.innerWidth;
-  H=vv?vv.height:window.innerHeight;
-  // Size #app to the actual visible area (excludes browser chrome)
-  appEl.style.width=W+'px';appEl.style.height=H+'px';
-  if(vv){appEl.style.top=vv.offsetTop+'px';appEl.style.left=vv.offsetLeft+'px'}
+  // Read actual rendered size of #app (CSS 100dvh handles browser chrome)
+  W=appEl.clientWidth;
+  H=appEl.clientHeight;
   canvas.width=W*DPR;canvas.height=H*DPR;
   canvas.style.width=W+'px';canvas.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
 resize();window.addEventListener('resize',resize);
-if(window.visualViewport){
-  window.visualViewport.addEventListener('resize',resize);
-  window.visualViewport.addEventListener('scroll',resize);
-}
+if(window.visualViewport)window.visualViewport.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(resize,200));
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
-// Try to lock orientation to landscape (works on Android Chrome, some browsers)
+// Try to lock orientation to landscape
 try{screen.orientation.lock('landscape').catch(()=>{})}catch(e){}
 
 // ===== MUSIC ENGINE (Web Audio API) =====
@@ -357,9 +351,14 @@ const startOverlay=document.getElementById('startOverlay');
 let animStarted=false;
 startOverlay.addEventListener('click',()=>{
   if(animStarted)return;animStarted=true;
+  // Try fullscreen (works on Android Chrome; iOS Safari ignores)
+  const el=document.documentElement;
+  if(el.requestFullscreen)el.requestFullscreen().catch(()=>{});
+  else if(el.webkitRequestFullscreen)el.webkitRequestFullscreen();
   startOverlay.classList.add('hidden');
   initAudio();
   playIndianaJones();
+  setTimeout(resize,300); // re-measure after fullscreen/UI change
   requestAnimationFrame(animate);
 });
 
