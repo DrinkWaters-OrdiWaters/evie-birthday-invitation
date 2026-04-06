@@ -17,7 +17,7 @@
   #app{position:relative;width:100%;height:100%;overflow:hidden}
   canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0}
 
-  #textBanner{position:absolute;top:16%;left:0;right:0;z-index:10;pointer-events:none;padding:0 24px;
+  #textBanner{position:absolute;top:24%;left:0;right:0;z-index:10;pointer-events:none;padding:0 24px;
   text-align:center;display:flex;align-items:center;justify-content:center}
   .scene-text{opacity:0;transform:translateY(-20px) scale(0.95);transition:opacity 1s ease,transform 1s ease;
   position:absolute;width:auto;max-width:85%;margin:0 auto;padding:24px 32px;background:rgba(0,0,0,0.82);
@@ -84,7 +84,7 @@
   50%{transform:scale(1.08);box-shadow:0 0 60px rgba(255,105,180,0.7),0 0 100px rgba(255,215,0,0.3)}}
   #startOverlay.hidden{opacity:0;pointer-events:none;transition:opacity .5s ease}
 
-  #muteBtn{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:100;
+  #muteBtn{position:absolute;top:calc(60px + env(safe-area-inset-top,0px));right:12px;z-index:100;
   background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:50%;width:40px;height:40px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:#fff;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;
@@ -92,7 +92,7 @@
   #muteBtn.visible{opacity:1;pointer-events:all}
 
   @media(max-width:600px){
-    #textBanner{top:10%}.scene-text{padding:14px 22px;max-width:92%;border-radius:14px}
+    #textBanner{top:20%}.scene-text{padding:14px 22px;max-width:92%;border-radius:14px}
     .scene-text h1{font-size:clamp(1.3rem,6vw,2.5rem)}.scene-text h2{font-size:clamp(1rem,5vw,1.8rem)}
     .scene-text p{font-size:clamp(.9rem,3.8vw,1.15rem)}
     #invitePanel .inner{padding:10px 12px}#invitePanel .invite-title{font-size:clamp(1rem,5vw,1.6rem)}
@@ -101,12 +101,20 @@
     #replayBtn{bottom:calc(120px + env(safe-area-inset-bottom,0px));padding:8px 16px;font-size:.75rem}
     #nextBtn{padding:14px 40px;font-size:1.05rem;bottom:calc(20px + env(safe-area-inset-bottom,0px))}}
   @media(max-width:380px){.scene-text h1{font-size:1.2rem}.scene-text h2{font-size:.95rem}.scene-text p{font-size:.85rem}#invitePanel .invite-detail{font-size:.75rem}}
-  @media(max-height:500px){#textBanner{top:3%}.scene-text{padding:8px 16px}
-    .scene-text h1{font-size:clamp(1rem,4vh,2rem)}.scene-text h2{font-size:clamp(.8rem,3vh,1.5rem)}
-    .scene-text p{font-size:clamp(.8rem,3vh,1rem)}
-    #invitePanel .inner{padding:6px 12px}#invitePanel .invite-title{font-size:1rem;margin-bottom:2px}
-    #invitePanel .invite-detail{font-size:.6rem}
-    #replayBtn{bottom:calc(80px + env(safe-area-inset-bottom,0px));padding:6px 14px;font-size:.7rem}}
+  @media(max-height:500px){
+    #textBanner{top:18%}
+    .scene-text{padding:6px 14px;max-width:70%;border-radius:10px}
+    .scene-text h1{font-size:clamp(.85rem,3.5vh,1.6rem);margin-bottom:0}
+    .scene-text h2{font-size:clamp(.75rem,2.8vh,1.2rem);margin-bottom:0}
+    .scene-text p{font-size:clamp(.7rem,2.5vh,.9rem);margin:.2em 0;line-height:1.3}
+    #invitePanel .inner{padding:6px 12px}#invitePanel .invite-title{font-size:clamp(.85rem,3vh,1.2rem);margin-bottom:2px}
+    #invitePanel .invite-detail{font-size:clamp(.55rem,2vh,.75rem)}
+    #invitePanel .invite-note{font-size:clamp(.55rem,1.8vh,.75rem);line-height:1.3;margin-top:3px}
+    #invitePanel .invite-small{font-size:clamp(.45rem,1.5vh,.6rem);margin-top:3px}
+    #nextBtn{padding:10px 32px;font-size:.9rem;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
+    #replayBtn{bottom:calc(60px + env(safe-area-inset-bottom,0px));padding:6px 14px;font-size:.7rem}
+    #muteBtn{top:8px;right:8px;width:32px;height:32px;font-size:1rem}
+  }
 
   /* --- Force landscape: portrait blocker --- */
   #rotateOverlay{display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a0a2e,#0a0e27 50%,#1a0a2e);
