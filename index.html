@@ -105,9 +105,24 @@
     #invitePanel .inner{padding:6px 12px}#invitePanel .invite-title{font-size:1rem;margin-bottom:2px}
     #invitePanel .invite-detail{font-size:.6rem}
     #replayBtn{bottom:calc(80px + env(safe-area-inset-bottom,0px));padding:6px 14px;font-size:.7rem}}
+
+  /* --- Force landscape: portrait blocker --- */
+  #rotateOverlay{display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a0a2e,#0a0e27 50%,#1a0a2e);
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+  #rotateOverlay .rotate-icon{font-size:4rem;animation:rotate-wiggle 1.5s ease-in-out infinite;margin-bottom:20px}
+  #rotateOverlay h2{font-family:'Fredoka One',cursive;color:#FF69B4;font-size:1.6rem;
+  text-shadow:0 0 20px rgba(255,105,180,0.4);margin-bottom:10px}
+  #rotateOverlay p{color:rgba(255,255,255,0.7);font-size:1rem;font-weight:600}
+  @keyframes rotate-wiggle{0%,100%{transform:rotate(0deg)}25%{transform:rotate(90deg)}75%{transform:rotate(90deg)}}
+  @media(orientation:portrait) and (max-width:900px){#rotateOverlay{display:flex}}
 </style>
 </head>
 <body>
+<div id="rotateOverlay">
+  <div class="rotate-icon">📱</div>
+  <h2>Turn your phone sideways!</h2>
+  <p>This invitation is best viewed in landscape mode</p>
+</div>
 <div id="startOverlay">
   <div class="start-icon"></div>
   <h2>Evie-tation!</h2>
@@ -150,6 +165,8 @@ canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.width=W+'px';canvas.style.he
 resize();window.addEventListener('resize',resize);
 window.addEventListener('orientationchange',()=>setTimeout(resize,200));
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+// Try to lock orientation to landscape (works on Android Chrome, some browsers)
+try{screen.orientation.lock('landscape').catch(()=>{})}catch(e){}
 
 // ===== MUSIC ENGINE (Web Audio API) =====
 let audioCtx,musicOn=true,masterGain;
