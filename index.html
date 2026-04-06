@@ -208,7 +208,7 @@ function updateViewportMetrics(){
   rootStyle.setProperty('--viewport-top',topInset+'px');
   rootStyle.setProperty('--viewport-bottom',bottomInset+'px');
   rootStyle.setProperty('--app-height',rawH+'px');
-  rootStyle.setProperty('--immersive-scroll-space',isLandscapeMobile()?Math.max(96,topInset+64)+'px':'0px');
+  rootStyle.setProperty('--immersive-scroll-space',isLandscapeMobile()?Math.max(160,topInset+bottomInset+120)+'px':'0px');
   return{rawW,rawH,topInset,bottomInset};
 }
 function resize(){
@@ -223,12 +223,30 @@ function resize(){
   ctx.imageSmoothingEnabled=true;
   if('imageSmoothingQuality'in ctx)ctx.imageSmoothingQuality='high';
 }
+function getImmersiveScrollSpace(){
+  return Math.max(0,Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--immersive-scroll-space'))||0));
+}
 function collapseBrowserChrome(attempt=0){
   if(!isLandscapeMobile())return;
-  const target=Math.max(1,Math.min(72,Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--immersive-scroll-space'))||0)-1));
+  const space=getImmersiveScrollSpace();
+  if(space<=0)return;
+  const target=Math.max(1,space-2);
   window.scrollTo(0,target);
+  document.documentElement.scrollTop=target;
+  document.body.scrollTop=target;
   resize();
-  if(attempt<6)setTimeout(()=>collapseBrowserChrome(attempt+1),attempt<3?120:220);
+  if(attempt<10){
+    const delay=attempt<4?90:180;
+    requestAnimationFrame(()=>setTimeout(()=>collapseBrowserChrome(attempt+1),delay));
+  }
+}
+function requestImmersiveMode(){
+  if(!isLandscapeMobile())return;
+  resize();
+  collapseBrowserChrome();
+  setTimeout(collapseBrowserChrome,120);
+  setTimeout(collapseBrowserChrome,320);
+  setTimeout(collapseBrowserChrome,700);
 }
 resize();window.addEventListener('resize',resize);
 window.addEventListener('scroll',()=>requestAnimationFrame(resize),{passive:true});
@@ -236,8 +254,12 @@ if(window.visualViewport){
   window.visualViewport.addEventListener('resize',resize);
   window.visualViewport.addEventListener('scroll',resize);
 }
-window.addEventListener('orientationchange',()=>setTimeout(()=>{resize();collapseBrowserChrome();},200));
-window.addEventListener('pageshow',()=>setTimeout(()=>{resize();collapseBrowserChrome();},120));
+window.addEventListener('orientationchange',()=>setTimeout(requestImmersiveMode,200));
+window.addEventListener('pageshow',()=>setTimeout(requestImmersiveMode,120));
+window.addEventListener('load',()=>setTimeout(requestImmersiveMode,120));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)setTimeout(requestImmersiveMode,120)});
+document.addEventListener('touchstart',()=>requestImmersiveMode(),{passive:true});
+document.addEventListener('pointerdown',()=>requestImmersiveMode(),{passive:true});
 // Try to lock orientation to landscape
 try{screen.orientation.lock('landscape').catch(()=>{})}catch(e){}
 
@@ -419,8 +441,8 @@ startOverlay.addEventListener('click',()=>{
   startOverlay.classList.add('hidden');
   initAudio();
   playIndianaJones();
-  collapseBrowserChrome();
-  setTimeout(()=>{resize();collapseBrowserChrome();},300); // re-measure after fullscreen/UI change
+  requestImmersiveMode();
+  setTimeout(()=>{resize();requestImmersiveMode();},300); // re-measure after fullscreen/UI change
   requestAnimationFrame(animate);
 });
 
@@ -1406,7 +1428,7 @@ nextBtn.addEventListener('click',()=>{
   paused=false;
   nextBtn.classList.remove('visible');
   if(scIdx<scenes.length-1){scIdx++;scEl=0;hideAll()}
-  collapseBrowserChrome();
+  requestImmersiveMode();
 });
 
 function animate(ts){
