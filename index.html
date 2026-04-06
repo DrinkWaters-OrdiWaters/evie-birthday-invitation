@@ -9,15 +9,20 @@
 <title>Evie-tation! Evie's 7th Birthday</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;600;700&display=swap');
+  :root{--app-height:100dvh;--viewport-top:0px;--viewport-bottom:0px;--immersive-scroll-space:0px}
   *{margin:0;padding:0;box-sizing:border-box}
-  html{height:100%;height:100dvh;overflow:hidden}
-  body{overflow:hidden;background:#0a0e27;font-family:'Quicksand','Comic Sans MS',sans-serif;
-  width:100%;height:100%;margin:0;touch-action:manipulation;-webkit-touch-callout:none;
-  -webkit-user-select:none;user-select:none;overscroll-behavior:none}
-  #app{position:relative;width:100%;height:100%;overflow:hidden}
-  canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0}
+  html{width:100%;min-height:100%;overflow-x:hidden;background:#0a0e27}
+  body{position:relative;overflow-x:hidden;overflow-y:auto;background:#0a0e27;font-family:'Quicksand','Comic Sans MS',sans-serif;
+  width:100%;min-height:calc(var(--app-height) + var(--immersive-scroll-space));margin:0;touch-action:manipulation;
+  -webkit-touch-callout:none;-webkit-user-select:none;user-select:none;overscroll-behavior:none;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none}
+  body::-webkit-scrollbar{display:none}
+  #app{position:fixed;inset:0;width:100%;height:var(--app-height);overflow:hidden;background:#0a0e27}
+  canvas{display:block;position:absolute;top:var(--viewport-top);left:0}
+  #safeAreaProbe{position:fixed;inset:0;visibility:hidden;pointer-events:none;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 
-  #textBanner{position:absolute;top:24%;left:0;right:0;z-index:10;pointer-events:none;padding:0 24px;
+  #textBanner{position:absolute;top:calc(var(--viewport-top) + 24%);left:0;right:0;z-index:10;pointer-events:none;padding:0 24px;
   text-align:center;display:flex;align-items:center;justify-content:center}
   .scene-text{opacity:0;transform:translateY(-20px) scale(0.95);transition:opacity 1s ease,transform 1s ease;
   position:absolute;width:auto;max-width:85%;margin:0 auto;padding:24px 32px;background:rgba(0,0,0,0.82);
@@ -31,9 +36,8 @@
   .scene-text p{font-size:clamp(1rem,2.5vw,1.4rem);font-weight:700;color:#fff;
   text-shadow:0 1px 6px rgba(0,0,0,0.7);margin:.3em 0 .6em 0;line-height:1.5}
 
-  #invitePanel{position:absolute;bottom:0;left:0;right:0;z-index:10;pointer-events:none;
-  opacity:0;transform:translateY(40px);transition:opacity 1.2s ease,transform 1.2s ease;
-  padding-bottom:env(safe-area-inset-bottom,0px)}
+  #invitePanel{position:absolute;bottom:var(--viewport-bottom);left:0;right:0;z-index:10;pointer-events:none;
+  opacity:0;transform:translateY(40px);transition:opacity 1.2s ease,transform 1.2s ease}
   #invitePanel.visible{opacity:1;transform:translateY(0)}
   #invitePanel .inner{background:rgba(10,14,39,0.85);-webkit-backdrop-filter:blur(12px);
   backdrop-filter:blur(12px);border-top:2px solid rgba(255,215,0,0.2);padding:12px 16px;text-align:center}
@@ -45,7 +49,7 @@
   #invitePanel .invite-note{font-size:clamp(.8rem,1.8vw,1rem);color:rgba(255,255,255,0.85);font-weight:700;margin-top:6px;line-height:1.5}
   #invitePanel .invite-small{font-size:clamp(.6rem,1.3vw,.8rem);color:rgba(255,255,255,0.5);margin-top:6px}
 
-  #replayBtn{position:absolute;bottom:calc(130px + env(safe-area-inset-bottom,0px));right:16px;z-index:100;
+  #replayBtn{position:absolute;bottom:calc(130px + var(--viewport-bottom));right:16px;z-index:100;
   background:linear-gradient(135deg,#FF69B4,#FFD700);border:none;border-radius:50px;padding:10px 20px;
   color:white;font-family:'Fredoka One',cursive;font-size:.85rem;cursor:pointer;opacity:0;
   transition:opacity .5s,transform .2s;pointer-events:none;box-shadow:0 4px 20px rgba(255,105,180,0.4);
@@ -53,7 +57,7 @@
   #replayBtn.visible{opacity:1;pointer-events:all}
   #replayBtn:active{transform:scale(.95)}
 
-  #nextBtn{position:absolute;bottom:calc(32px + env(safe-area-inset-bottom,0px));left:50%;
+  #nextBtn{position:absolute;bottom:calc(32px + var(--viewport-bottom));left:50%;
   transform:translateX(-50%);z-index:50;
   background:linear-gradient(135deg,#FF69B4,#FF85C8 40%,#FFD700);
   border:2px solid rgba(255,255,255,0.3);border-radius:50px;
@@ -70,7 +74,7 @@
 
   #startOverlay{position:absolute;inset:0;z-index:200;background:linear-gradient(135deg,#1a0a2e,#0a0e27 50%,#1a0a2e);
   display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
-  -webkit-tap-highlight-color:transparent}
+  -webkit-tap-highlight-color:transparent;padding:calc(24px + var(--viewport-top)) 24px calc(24px + var(--viewport-bottom))}
   #startOverlay .start-icon{width:90px;height:90px;border-radius:50%;
   background:linear-gradient(135deg,#FF69B4,#FFD700);display:flex;align-items:center;justify-content:center;
   box-shadow:0 0 40px rgba(255,105,180,0.5),0 0 80px rgba(255,215,0,0.2);
@@ -84,7 +88,7 @@
   50%{transform:scale(1.08);box-shadow:0 0 60px rgba(255,105,180,0.7),0 0 100px rgba(255,215,0,0.3)}}
   #startOverlay.hidden{opacity:0;pointer-events:none;transition:opacity .5s ease}
 
-  #muteBtn{position:absolute;top:calc(60px + env(safe-area-inset-top,0px));right:12px;z-index:100;
+  #muteBtn{position:absolute;top:calc(16px + var(--viewport-top));right:12px;z-index:100;
   background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:50%;width:40px;height:40px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:#fff;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;
@@ -92,17 +96,17 @@
   #muteBtn.visible{opacity:1;pointer-events:all}
 
   @media(max-width:600px){
-    #textBanner{top:20%}.scene-text{padding:14px 22px;max-width:92%;border-radius:14px}
+    #textBanner{top:calc(var(--viewport-top) + 20%)}.scene-text{padding:14px 22px;max-width:92%;border-radius:14px}
     .scene-text h1{font-size:clamp(1.3rem,6vw,2.5rem)}.scene-text h2{font-size:clamp(1rem,5vw,1.8rem)}
     .scene-text p{font-size:clamp(.9rem,3.8vw,1.15rem)}
     #invitePanel .inner{padding:10px 12px}#invitePanel .invite-title{font-size:clamp(1rem,5vw,1.6rem)}
     #invitePanel .invite-detail{font-size:clamp(.8rem,3.2vw,1rem)}
     #invitePanel .invite-row{gap:4px 10px}
-    #replayBtn{bottom:calc(120px + env(safe-area-inset-bottom,0px));padding:8px 16px;font-size:.75rem}
-    #nextBtn{padding:14px 40px;font-size:1.05rem;bottom:calc(20px + env(safe-area-inset-bottom,0px))}}
+    #replayBtn{bottom:calc(120px + var(--viewport-bottom));padding:8px 16px;font-size:.75rem}
+    #nextBtn{padding:14px 40px;font-size:1.05rem;bottom:calc(20px + var(--viewport-bottom))}}
   @media(max-width:380px){.scene-text h1{font-size:1.2rem}.scene-text h2{font-size:.95rem}.scene-text p{font-size:.85rem}#invitePanel .invite-detail{font-size:.75rem}}
   @media(max-height:500px){
-    #textBanner{top:18%}
+    #textBanner{top:calc(var(--viewport-top) + 18%)}
     .scene-text{padding:6px 14px;max-width:70%;border-radius:10px}
     .scene-text h1{font-size:clamp(.85rem,3.5vh,1.6rem);margin-bottom:0}
     .scene-text h2{font-size:clamp(.75rem,2.8vh,1.2rem);margin-bottom:0}
@@ -111,14 +115,15 @@
     #invitePanel .invite-detail{font-size:clamp(.55rem,2vh,.75rem)}
     #invitePanel .invite-note{font-size:clamp(.55rem,1.8vh,.75rem);line-height:1.3;margin-top:3px}
     #invitePanel .invite-small{font-size:clamp(.45rem,1.5vh,.6rem);margin-top:3px}
-    #nextBtn{padding:10px 32px;font-size:.9rem;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
-    #replayBtn{bottom:calc(60px + env(safe-area-inset-bottom,0px));padding:6px 14px;font-size:.7rem}
-    #muteBtn{top:8px;right:8px;width:32px;height:32px;font-size:1rem}
+    #nextBtn{padding:10px 32px;font-size:.9rem;bottom:calc(10px + var(--viewport-bottom))}
+    #replayBtn{bottom:calc(60px + var(--viewport-bottom));padding:6px 14px;font-size:.7rem}
+    #muteBtn{top:calc(8px + var(--viewport-top));right:8px;width:32px;height:32px;font-size:1rem}
   }
 
   /* --- Force landscape: portrait blocker --- */
   #rotateOverlay{display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a0a2e,#0a0e27 50%,#1a0a2e);
-  flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+  flex-direction:column;align-items:center;justify-content:center;text-align:center;
+  padding:calc(24px + var(--viewport-top)) 24px calc(24px + var(--viewport-bottom))}
   #rotateOverlay .rotate-icon{font-size:4rem;animation:rotate-wiggle 1.5s ease-in-out infinite;margin-bottom:20px}
   #rotateOverlay h2{font-family:'Fredoka One',cursive;color:#FF69B4;font-size:1.6rem;
   text-shadow:0 0 20px rgba(255,105,180,0.4);margin-bottom:10px}
@@ -133,6 +138,7 @@
   <h2>Turn your phone sideways!</h2>
   <p>This invitation is best viewed in landscape mode</p>
 </div>
+<div id="safeAreaProbe" aria-hidden="true"></div>
 <div id="app">
 <div id="startOverlay">
   <div class="start-icon"></div>
@@ -160,7 +166,7 @@
     <span class="invite-detail">🕕 Drop-off at 6:00 PM</span>
     <span class="invite-detail">📍 At Evie's house</span>
   </div>
-  <div class="invite-row"><span class="invite-detail">🎬 Outdoor Movie Night — 90 min before Sundown!</span></div>
+  <div class="invite-row"><span class="invite-detail">🎬 Outdoor Moovie Night - From Sunset to Morning</span></div>
   <p class="invite-note">⛺ Sleepover optional — for the brave adventurers!<br>Big tent in the garden with an entertainer. Sleeping bags &amp; breakfast provided 🥞</p>
   <p class="invite-small">Please RSVP by replying to this message</p>
 </div></div>
@@ -172,20 +178,66 @@
 <script>
 const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
 const appEl=document.getElementById('app');
+const safeAreaProbe=document.getElementById('safeAreaProbe');
+const rootStyle=document.documentElement.style;
+const coarsePointer=window.matchMedia('(pointer: coarse)').matches||'ontouchstart'in window;
+const viewportState={top:0,bottom:0};
 let W,H,DPR;
+function readInset(side){
+  return safeAreaProbe?parseFloat(getComputedStyle(safeAreaProbe)[side])||0:0;
+}
+function isLandscapeMobile(){
+  return coarsePointer&&window.innerWidth>window.innerHeight;
+}
+function clampChromeDelta(value,rawH){
+  const maxChrome=Math.min(160,Math.max(44,rawH*.28));
+  return value>0&&value<maxChrome?value:0;
+}
+function updateViewportMetrics(){
+  const rawW=Math.max(1,Math.round(window.innerWidth||document.documentElement.clientWidth||appEl.clientWidth||1));
+  const rawH=Math.max(1,Math.round(window.innerHeight||document.documentElement.clientHeight||appEl.clientHeight||1));
+  const vv=window.visualViewport;
+  const safeTop=Math.round(readInset('paddingTop'));
+  const safeBottom=Math.round(readInset('paddingBottom'));
+  const vvTop=vv?Math.round(vv.offsetTop||0):0;
+  const vvHeight=vv?Math.round(vv.height||rawH):rawH;
+  const vvBottom=vv?Math.max(0,Math.round(rawH-vvHeight-vvTop)):0;
+  const outerChrome=isLandscapeMobile()?clampChromeDelta(Math.round((window.outerHeight||0)-rawH),rawH):0;
+  const topInset=Math.max(safeTop,vvTop,outerChrome);
+  const bottomInset=Math.max(safeBottom,vvBottom);
+  viewportState.top=topInset;
+  viewportState.bottom=bottomInset;
+  rootStyle.setProperty('--viewport-top',topInset+'px');
+  rootStyle.setProperty('--viewport-bottom',bottomInset+'px');
+  rootStyle.setProperty('--app-height',rawH+'px');
+  rootStyle.setProperty('--immersive-scroll-space',isLandscapeMobile()?Math.max(96,topInset+64)+'px':'0px');
+  return{rawW,rawH,topInset,bottomInset};
+}
 function resize(){
+  const{rawW,rawH,topInset,bottomInset}=updateViewportMetrics();
   DPR=Math.min(window.devicePixelRatio||1,2);
-  // Read actual rendered size of #app (CSS 100dvh handles browser chrome)
-  W=appEl.clientWidth;
-  H=appEl.clientHeight;
+  W=rawW;
+  H=Math.max(1,rawH-topInset-bottomInset);
   canvas.width=W*DPR;canvas.height=H*DPR;
+  canvas.style.top=topInset+'px';
   canvas.style.width=W+'px';canvas.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
+function collapseBrowserChrome(attempt=0){
+  if(!isLandscapeMobile())return;
+  const target=Math.max(1,Math.min(72,Math.round(parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--immersive-scroll-space'))||0)-1));
+  window.scrollTo(0,target);
+  resize();
+  if(attempt<6)setTimeout(()=>collapseBrowserChrome(attempt+1),attempt<3?120:220);
+}
 resize();window.addEventListener('resize',resize);
-if(window.visualViewport)window.visualViewport.addEventListener('resize',resize);
-window.addEventListener('orientationchange',()=>setTimeout(resize,200));
-document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+window.addEventListener('scroll',()=>requestAnimationFrame(resize),{passive:true});
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',resize);
+  window.visualViewport.addEventListener('scroll',resize);
+}
+window.addEventListener('orientationchange',()=>setTimeout(()=>{resize();collapseBrowserChrome();},200));
+window.addEventListener('pageshow',()=>setTimeout(()=>{resize();collapseBrowserChrome();},120));
 // Try to lock orientation to landscape
 try{screen.orientation.lock('landscape').catch(()=>{})}catch(e){}
 
@@ -367,7 +419,8 @@ startOverlay.addEventListener('click',()=>{
   startOverlay.classList.add('hidden');
   initAudio();
   playIndianaJones();
-  setTimeout(resize,300); // re-measure after fullscreen/UI change
+  collapseBrowserChrome();
+  setTimeout(()=>{resize();collapseBrowserChrome();},300); // re-measure after fullscreen/UI change
   requestAnimationFrame(animate);
 });
 
@@ -1352,6 +1405,7 @@ nextBtn.addEventListener('click',()=>{
   paused=false;
   nextBtn.classList.remove('visible');
   if(scIdx<scenes.length-1){scIdx++;scEl=0;hideAll()}
+  collapseBrowserChrome();
 });
 
 function animate(ts){
