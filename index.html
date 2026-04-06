@@ -1161,41 +1161,31 @@ function drawBirthdayScene(t,sp){
   ctx.restore();
 }
 
-function drawSleepScene(t,sp){
+function drawSleepScene(t,sp,cinP,skyP){
   ctx.save();
-  const tx=W*.43,ty=H*.58; // tent center & base
-  // 8 kids run one by one from the lawn INTO the tent.
-  // They shrink + fade as they reach the tent entrance to simulate entering.
+  const tx=W*.43,ty=H*.58;
+  // --- Phase 1: draw kids FIRST (behind tent) ---
+  // Kids run one by one from the lawn toward the tent center.
+  // The tent is drawn ON TOP afterwards so they naturally disappear behind it.
   for(let i=0;i<8;i++){
-    // Stagger: each kid starts 0.04 apart, takes ~0.25 to reach tent
-    const kidStart=0.02+i*0.04;
-    const kidArrival=kidStart+0.28;
+    const kidStart=0.02+i*0.06;   // staggered start
+    const kidArrival=kidStart+0.30; // each takes 30% of scene to reach tent
     const kp=clamp01((sp-kidStart)/(kidArrival-kidStart));
-    if(kp<=0||kp>=1)continue;
-    // Start: spread in a line on the lawn, right of tent
-    const startX=tx+W*.12+i*W*.035;
-    const startY=H*.58;
-    // End: tent opening
+    if(kp<=0||kp>=1)continue; // not started yet, or already inside tent
+    // Start: spread on the lawn, right of tent
+    const startX=W*.58+i*W*.035;
+    const startY=H*.56+(i%2)*H*.015;
+    // End: tent center — tent triangle will cover them well before this
     const endX=tx;
-    const endY=ty-H*.01;
+    const endY=ty-H*.02;
     const kx=lerp(startX,endX,easeInOut(kp));
     const ky=lerp(startY,endY,easeInOut(kp));
-    // Running bounce
     const bounce=Math.abs(Math.sin(t*9+i*2))*5;
-    // Last 25% of run: shrink + fade (entering tent)
-    const enterP=clamp01((kp-0.75)/0.25);
-    const scale=1-enterP*0.6;  // shrink to 40%
-    const alpha=1-enterP;      // fade to 0
-    ctx.save();
-    ctx.globalAlpha=alpha;
-    // Scale the kid by translating to position, scaling, then drawing at origin
-    ctx.translate(kx,ky-bounce);
-    ctx.scale(scale,scale);
-    ctx.translate(-kx,-(ky-bounce));
     drawKid(kx,ky-bounce,KIDS[i],t,false,false);
-    ctx.restore();
   }
-  // Sleeping bags visible inside tent opening after kids enter
+  // --- Phase 2: draw tent ON TOP of kids — covers them as they enter ---
+  drawTent(cinP,skyP);
+  // --- Phase 3: sleeping bags inside tent opening (on top of tent) ---
   if(sp>0.55){
     const bagP=clamp01((sp-0.55)/0.25);
     const bags=[{x:tx-12,y:ty-18,c:'#FF69B4'},{x:tx+6,y:ty-16,c:'#4D96FF'},
@@ -1299,7 +1289,7 @@ const scenes=[
   {name:'title',dur:3000},
   {name:'movie',dur:5000},
   {name:'birthday',dur:5000,waitAt:0.6},
-  {name:'sleepover',dur:6000,waitAt:0.25},
+  {name:'sleepover',dur:8000,waitAt:0.85},
   {name:'sunrise',dur:6000,waitAt:0.45},
   {name:'invite',dur:10000},
 ];
@@ -1375,11 +1365,11 @@ function animate(ts){
   drawPool(skyP,t);
   drawHouse(skyP,dim);drawParasol(skyP);drawBasket(skyP);
   drawLights(cinP,t);drawScreen(cinP,t,screenPhase,movieProg);drawProjector(cinP);
-  drawTent(cinP,skyP);drawMattresses(cinP);drawPopcorn(cinP,t);
+  if(cs.name!=='sleepover')drawTent(cinP,skyP);drawMattresses(cinP);drawPopcorn(cinP,t);
 
   // Scene-specific kid drawing
   if(cs.name==='birthday')drawBirthdayScene(t,sp);
-  else if(cs.name==='sleepover')drawSleepScene(t,sp);
+  else if(cs.name==='sleepover')drawSleepScene(t,sp,cinP,skyP);
   else if(cs.name==='sunrise')drawSunriseScene(t,sp);
   else updateKids(t,cinP);
 
