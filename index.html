@@ -13,9 +13,10 @@
   html,body{overflow:hidden;background:#0a0e27;font-family:'Quicksand','Comic Sans MS',sans-serif;
   width:100%;height:100%;position:fixed;touch-action:manipulation;-webkit-touch-callout:none;
   -webkit-user-select:none;user-select:none;overscroll-behavior:none}
-  canvas{display:block;width:100%;height:100%;position:fixed;top:0;left:0}
+  #app{position:fixed;top:0;left:0;width:100%;height:100%;overflow:hidden}
+  canvas{display:block;width:100%;height:100%;position:absolute;top:0;left:0}
 
-  #textBanner{position:fixed;top:16%;left:0;right:0;z-index:10;pointer-events:none;padding:0 24px;
+  #textBanner{position:absolute;top:16%;left:0;right:0;z-index:10;pointer-events:none;padding:0 24px;
   text-align:center;display:flex;align-items:center;justify-content:center}
   .scene-text{opacity:0;transform:translateY(-20px) scale(0.95);transition:opacity 1s ease,transform 1s ease;
   position:absolute;width:auto;max-width:85%;margin:0 auto;padding:24px 32px;background:rgba(0,0,0,0.82);
@@ -29,7 +30,7 @@
   .scene-text p{font-size:clamp(1rem,2.5vw,1.4rem);font-weight:700;color:#fff;
   text-shadow:0 1px 6px rgba(0,0,0,0.7);margin:.3em 0 .6em 0;line-height:1.5}
 
-  #invitePanel{position:fixed;bottom:0;left:0;right:0;z-index:10;pointer-events:none;
+  #invitePanel{position:absolute;bottom:0;left:0;right:0;z-index:10;pointer-events:none;
   opacity:0;transform:translateY(40px);transition:opacity 1.2s ease,transform 1.2s ease;
   padding-bottom:env(safe-area-inset-bottom,0px)}
   #invitePanel.visible{opacity:1;transform:translateY(0)}
@@ -43,7 +44,7 @@
   #invitePanel .invite-note{font-size:clamp(.8rem,1.8vw,1rem);color:rgba(255,255,255,0.85);font-weight:700;margin-top:6px;line-height:1.5}
   #invitePanel .invite-small{font-size:clamp(.6rem,1.3vw,.8rem);color:rgba(255,255,255,0.5);margin-top:6px}
 
-  #replayBtn{position:fixed;bottom:calc(130px + env(safe-area-inset-bottom,0px));right:16px;z-index:100;
+  #replayBtn{position:absolute;bottom:calc(130px + env(safe-area-inset-bottom,0px));right:16px;z-index:100;
   background:linear-gradient(135deg,#FF69B4,#FFD700);border:none;border-radius:50px;padding:10px 20px;
   color:white;font-family:'Fredoka One',cursive;font-size:.85rem;cursor:pointer;opacity:0;
   transition:opacity .5s,transform .2s;pointer-events:none;box-shadow:0 4px 20px rgba(255,105,180,0.4);
@@ -51,7 +52,7 @@
   #replayBtn.visible{opacity:1;pointer-events:all}
   #replayBtn:active{transform:scale(.95)}
 
-  #nextBtn{position:fixed;bottom:calc(32px + env(safe-area-inset-bottom,0px));left:50%;
+  #nextBtn{position:absolute;bottom:calc(32px + env(safe-area-inset-bottom,0px));left:50%;
   transform:translateX(-50%);z-index:50;
   background:linear-gradient(135deg,#FF69B4,#FF85C8 40%,#FFD700);
   border:2px solid rgba(255,255,255,0.3);border-radius:50px;
@@ -66,7 +67,7 @@
   @keyframes pulse-next{0%,100%{box-shadow:0 6px 30px rgba(255,105,180,0.5),0 0 0 4px rgba(255,105,180,0.12)}
   50%{box-shadow:0 6px 40px rgba(255,105,180,0.8),0 0 60px rgba(255,215,0,0.3),0 0 0 6px rgba(255,105,180,0.2)}}
 
-  #startOverlay{position:fixed;inset:0;z-index:200;background:linear-gradient(135deg,#1a0a2e,#0a0e27 50%,#1a0a2e);
+  #startOverlay{position:absolute;inset:0;z-index:200;background:linear-gradient(135deg,#1a0a2e,#0a0e27 50%,#1a0a2e);
   display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;
   -webkit-tap-highlight-color:transparent}
   #startOverlay .start-icon{width:90px;height:90px;border-radius:50%;
@@ -82,7 +83,7 @@
   50%{transform:scale(1.08);box-shadow:0 0 60px rgba(255,105,180,0.7),0 0 100px rgba(255,215,0,0.3)}}
   #startOverlay.hidden{opacity:0;pointer-events:none;transition:opacity .5s ease}
 
-  #muteBtn{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:100;
+  #muteBtn{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:12px;z-index:100;
   background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.15);border-radius:50%;width:40px;height:40px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.2rem;color:#fff;
   -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);-webkit-tap-highlight-color:transparent;
@@ -123,6 +124,7 @@
   <h2>Turn your phone sideways!</h2>
   <p>This invitation is best viewed in landscape mode</p>
 </div>
+<div id="app">
 <div id="startOverlay">
   <div class="start-icon"></div>
   <h2>Evie-tation!</h2>
@@ -156,13 +158,29 @@
 
 <button id="nextBtn">Next &rsaquo;</button>
 <button id="replayBtn" onclick="location.reload()">🔄 Replay</button>
+</div><!-- #app -->
 
 <script>
 const canvas=document.getElementById('scene'),ctx=canvas.getContext('2d');
+const appEl=document.getElementById('app');
 let W,H,DPR;
-function resize(){DPR=Math.min(window.devicePixelRatio||1,2);W=window.innerWidth;H=window.innerHeight;
-canvas.width=W*DPR;canvas.height=H*DPR;canvas.style.width=W+'px';canvas.style.height=H+'px';ctx.setTransform(DPR,0,0,DPR,0,0)}
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  const vv=window.visualViewport;
+  W=vv?vv.width:window.innerWidth;
+  H=vv?vv.height:window.innerHeight;
+  // Size #app to the actual visible area (excludes browser chrome)
+  appEl.style.width=W+'px';appEl.style.height=H+'px';
+  if(vv){appEl.style.top=vv.offsetTop+'px';appEl.style.left=vv.offsetLeft+'px'}
+  canvas.width=W*DPR;canvas.height=H*DPR;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
 resize();window.addEventListener('resize',resize);
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',resize);
+  window.visualViewport.addEventListener('scroll',resize);
+}
 window.addEventListener('orientationchange',()=>setTimeout(resize,200));
 document.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
 // Try to lock orientation to landscape (works on Android Chrome, some browsers)
