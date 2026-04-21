@@ -47,6 +47,10 @@
   text-shadow:0 1px 2px rgba(0,0,0,0.8);white-space:nowrap}
   #invitePanel .invite-note{font-size:clamp(.8rem,1.8vw,1rem);color:rgba(255,255,255,0.85);font-weight:700;margin-top:6px;line-height:1.5}
   #invitePanel .invite-small{font-size:clamp(.6rem,1.3vw,.8rem);color:rgba(255,255,255,0.5);margin-top:6px}
+  #calLink{display:inline-block;margin-top:8px;padding:8px 20px;background:linear-gradient(135deg,#FF69B4,#FFD700);
+  color:#fff;font-family:'Fredoka One',cursive;font-size:clamp(.75rem,2vw,1rem);text-decoration:none;
+  border-radius:50px;pointer-events:all;box-shadow:0 4px 16px rgba(255,105,180,0.3);transition:transform .2s}
+  #calLink:active{transform:scale(.95)}
 
   #replayBtn{position:absolute;bottom:calc(130px + var(--viewport-bottom));right:16px;z-index:100;
   background:linear-gradient(135deg,#FF69B4,#FFD700);border:none;border-radius:50px;padding:10px 20px;
@@ -149,10 +153,11 @@
 <button id="muteBtn">🔊</button>
 
 <div id="textBanner">
-  <div class="scene-text" id="text-intro"><h1>Saturday, April 25th</h1><h2>A unique chance for a night out!</h2><p>Drop off your kids for the evening &amp; enjoy a Saturday dinner out.<br>It's Evie's 7th birthday — movie, popcorn &amp; laughs guaranteed!</p></div>
+  <div class="scene-text" id="text-intro"><h1>Thursday, April 23rd</h1><h2>A unique chance for a night out!</h2><p>Drop off your kids for the evening &amp; enjoy a Thursday dinner out.<br>It's Evie's 7th birthday — movie, popcorn &amp; laughs guaranteed!</p></div>
   <div class="scene-text" id="text-transform"><h2>When night falls...</h2><p>the garden transforms into a magical outdoor cinema</p></div>
   <div class="scene-text" id="text-cinema"><h2>Magical Movie Night Under the Stars</h2><p>Cozy mattresses, sleeping bags, popcorn & a movie under the sky!</p></div>
   <div class="scene-text" id="text-birthday"><h1>Happy Birthday Evie!</h1><p>Make a wish &amp; blow out the candles!</p></div>
+  <div class="scene-text" id="text-packing"><h2>🎒 What to bring for the adventurers</h2><p>🧥 A sweater — the movie will be outdoors!<br>🩳 Pajamas &amp; toothbrush for those staying the night<br>🛏️ A sleeping bag if you have one — we have extras too!<br><br>✨ A dream night awaits the brave campers ✨</p></div>
   <div class="scene-text" id="text-sleep"><h2>Time for the brave adventurers!</h2><p>Into the big tent for an unforgettable night under the stars</p></div>
   <div class="scene-text" id="text-sunrise"><h2>Good morning adventurers!</h2><p>The sun is rising... time to find mum &amp; dad!</p></div>
   <div class="scene-text" id="text-final"></div>
@@ -161,13 +166,14 @@
 <div id="invitePanel"><div class="inner">
   <span class="invite-title">Evie's 7th Birthday!</span>
   <div class="invite-row">
-    <span class="invite-detail">📅 Saturday, April 25th 2026</span>
-    <span class="invite-detail">🕕 Drop-off at 6:00 PM</span>
-    <span class="invite-detail">📍 At Evie's house</span>
+    <span class="invite-detail">📅 Thursday, April 23rd 2026</span>
+    <span class="invite-detail">🕕 Drop-off at 6:30 PM</span>
+    <span class="invite-detail">📍 950 Napoli Dr, Pacific Palisades</span>
   </div>
   <div class="invite-row"><span class="invite-detail">🎬 Outdoor Moovie Night - From Sunset to Morning</span></div>
   <p class="invite-note">⛺ Sleepover optional — for the brave adventurers!<br>Big tent in the garden with an entertainer. Sleeping bags &amp; breakfast provided 🥞</p>
   <p class="invite-small">Please RSVP by replying to this message</p>
+  <a id="calLink" href="https://calendar.google.com/calendar/render?action=TEMPLATE&text=Evie%27s+7th+Birthday+%F0%9F%8E%82&dates=20260423T163000/20260424T090000&details=Outdoor+Moovie+Night+-+From+Sunset+to+Morning%0ADrop-off+at+6%3A30pm.+Sleepover+optional!&location=950+Napoli+Dr%2C+Pacific+Palisades%2C+CA+90272" target="_blank" rel="noopener">📆 Add to Calendar</a>
 </div></div>
 
 <button id="nextBtn">Next &rsaquo;</button>
@@ -609,6 +615,36 @@ function drawGround(p){const gy=H*.58;
 ctx.fillStyle=lerpColor('#5cb85c','#1a3d1c',p);ctx.fillRect(0,gy,W,H-gy);
 ctx.save();ctx.globalAlpha=.05;ctx.fillStyle=lerpColor('#3a8a3a','#0d2a0d',p);
 for(let i=0;i<8;i++)ctx.fillRect(0,gy+(H-gy)*(i/8),W,2);ctx.restore()}
+
+function drawYardSign(){
+const sx=W*.92,botY=H*.95,sw=W*.165,sh=H*.18;
+const signTop=botY-sh,pw=H*.008;
+// Wooden post — from sign bottom into ground
+ctx.fillStyle='#8B5E3C';ctx.fillRect(sx-pw/2,signTop+sh*.3,pw,botY-signTop);
+ctx.fillStyle='#6B4226';ctx.fillRect(sx-pw/2,signTop+sh*.3,pw*.3,botY-signTop);
+// White sign board
+const r=6;ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,0.25)';ctx.shadowBlur=10;ctx.shadowOffsetY=3;
+ctx.beginPath();ctx.roundRect(sx-sw/2,signTop,sw,sh,r);ctx.fill();
+ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetY=0;
+// Border
+ctx.strokeStyle='#bbb';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(sx-sw/2,signTop,sw,sh,r);ctx.stroke();
+// Text
+const fs1=Math.max(10,sw*.12);const fs2=Math.max(8,sw*.09);
+ctx.fillStyle='#d4488a';ctx.font='bold '+fs1+'px Fredoka One,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+ctx.fillText("Evie's House",sx,signTop+sh*.18);
+ctx.fillStyle='#444';ctx.font='600 '+fs2+'px Quicksand,sans-serif';
+ctx.fillText('950 Napoli Dr',sx,signTop+sh*.38);
+ctx.fillStyle='#888';ctx.font='600 '+(fs2*.8)+'px Quicksand,sans-serif';
+ctx.fillText('Pacific Palisades',sx,signTop+sh*.54);
+// Handwritten date — slanted like written by hand
+ctx.save();
+const fsHand=Math.max(9,sw*.11);
+ctx.translate(sx,signTop+sh*.76);
+ctx.rotate(-0.06);
+ctx.fillStyle='#2a6dd4';ctx.font='italic 600 '+fsHand+'px "Comic Sans MS",cursive';
+ctx.fillText('Thursday 23rd',0,0);
+ctx.restore();
+ctx.textAlign='left'}
 
 // Golf course visible BEHIND the hedge (background)
 function drawGolfBehind(p){
@@ -1384,6 +1420,7 @@ const scenes=[
   {name:'title',dur:3000},
   {name:'movie',dur:5000},
   {name:'birthday',dur:5000,waitAt:0.6},
+  {name:'packing',dur:5000,waitAt:0.7},
   {name:'sleepover',dur:8000,waitAt:0.85},
   {name:'sunrise',dur:6000,waitAt:0.45},
   {name:'invite',dur:10000},
@@ -1393,7 +1430,7 @@ let paused=false;
 const waitedScenes=new Set();
 const txEls={intro:document.getElementById('text-intro'),transform:document.getElementById('text-transform'),
 cinema:document.getElementById('text-cinema'),birthday:document.getElementById('text-birthday'),
-sleep:document.getElementById('text-sleep'),sunrise:document.getElementById('text-sunrise'),
+packing:document.getElementById('text-packing'),sleep:document.getElementById('text-sleep'),sunrise:document.getElementById('text-sunrise'),
 final:document.getElementById('text-final')};
 const invPanel=document.getElementById('invitePanel'),replayBtn=document.getElementById('replayBtn');
 const nextBtn=document.getElementById('nextBtn');
@@ -1433,7 +1470,7 @@ function animate(ts){
   // Cinema elements
   let cinP=0;
   if(cs.name==='setup')cinP=sp;
-  else if(['countdown','title','movie','birthday','sleepover','sunrise','invite'].includes(cs.name))cinP=1;
+  else if(['countdown','title','movie','birthday','packing','sleepover','sunrise','invite'].includes(cs.name))cinP=1;
 
   // House dimming
   let dim=0;
@@ -1469,7 +1506,7 @@ function animate(ts){
   else if(cs.name==='sunrise')drawSunriseScene(t,sp);
   else updateKids(t,cinP);
 
-  drawFlies(t,skyP);drawConf();
+  drawYardSign();drawFlies(t,skyP);drawConf();
 
   // Text triggers
   if(cs.name==='day'&&sp>.15)txEls.intro.classList.add('visible');
@@ -1477,6 +1514,7 @@ function animate(ts){
   if(cs.name==='setup'&&sp>.3)txEls.cinema.classList.add('visible');
   if(cs.name==='movie'&&sp>.05)triggerMusic('homealone',playHomeAlone);
   if(cs.name==='birthday'&&sp>.1){txEls.birthday.classList.add('visible');triggerMusic('birthday',playHappyBirthday)}
+  if(cs.name==='packing'&&sp>.1)txEls.packing.classList.add('visible');
   if(cs.name==='sleepover'&&sp>.1){txEls.sleep.classList.add('visible');triggerMusic('lullaby',playLullaby)}
   if(cs.name==='sunrise'&&sp>.15){txEls.sunrise.classList.add('visible');triggerMusic('sunrise',playSunriseMusic)}
   if(cs.name==='invite'&&sp>.08){invPanel.classList.add('visible');
